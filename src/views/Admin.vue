@@ -462,7 +462,9 @@
                     >
                       {{ member.staff_role ? roleLabels[member.staff_role] : roleLabels[member.user_log_info.authorities.authority] }}
                     </div>
-                    <div v-else>
+                    <div v-else 
+                    class="cursor-pointer hover-underline-animation"
+                    @click="openPromoteModal(member)">
                       {{ member.staff_role ? roleLabels[member.staff_role] : roleLabels[member.user_log_info.authorities.authority] }}
                     </div>
                   </td>
@@ -572,10 +574,13 @@
               <tr class="text-left text-gray-700">
                 <th class="p-2">ID</th>
                 <th class="p-2">Tên</th>
+                <th class="p-2">Mã Duyệt</th>
                 <th class="p-2">Người bán</th>
                 <th class="p-2">Được kiểm định bởi</th>
                 <th class="p-2">Thời gian được kiểm định</th>
+                <th class="p-2">Trạng thái</th>
                 <th class="p-2">Hành động</th>
+                <th class="p-2">Xoá</th>
                 
               </tr>
             </thead>
@@ -586,6 +591,9 @@
               </td>
               <td class="p-2 border-b">{{ product.watch_name }}</td>
               <td class="p-2 border-b">
+                {{ req[product.watch_id]?.request_id ?? null }}
+              </td>
+              <td class="p-2 border-b">
                 <div class="flex items-center">
                   <img
                     :src="product.seller.member_image"
@@ -595,12 +603,16 @@
                   <span>{{ product.seller.user_log_info.username }}</span>
                 </div>
               </td>
-              <td class="p-2 border-b">N/a</td>
-              <td class="p-2 border-b">N/a</td>
+              <td class="p-2 border-b">{{ req[product.watch_id]?.appraiser_assigned ?? null }}</td>
+              <td class="p-2 border-b">{{ req[product.watch_id]?.appointment_date  ? formatDate(req[product.watch_id]?.appointment_date) : 'Chưa có ngày' }}</td>
+              <td class="p-2 border-b">{{ req[product.watch_id]?.status ?? null  }}</td>
               <td class="p-2 border-b">
                 <button @click="openAssignModal(product)" class="hover-underline-animation">
                   Giao cho Kiểm định viên
                 </button>
+              </td>
+              <td>
+                <button class="hover-underline-animation-r">Xoá</button>
               </td>
             </tr>
             </tbody>
@@ -880,7 +892,7 @@
           <button @click="showAssignModal = false" class="border-2 border-secondary p-2">
             Hủy
           </button>
-          <button @click="assignWatch" :disabled="!selectedAppraiser || !selectedDate" class="th-p-btn">
+          <button @click="assignWatch" :disabled="!selectedAppraiser || !date" class="th-p-btn">
             Xác nhận
           </button>
         </div>
@@ -902,9 +914,13 @@
         <!-- Pending Orders Dropdown -->
         <div class="order-select mb-4">
           <h3 class="text-xl font-medium mb-2">Chọn đơn hàng cần giao:</h3>
-          <select v-model="selectedOrder" class="w-full p-2 border rounded bg-black-99">
+          <select 
+            v-model="selectedOrderId" 
+            @change="logSelection" 
+            class="w-full p-2 border rounded bg-black-99"
+          >
             <option value="" disabled>Chọn một đơn hàng</option>
-            <option v-for="order in getShipOrder" :key="order.order_id" :value="order">
+            <option v-for="order in getShipOrder" :key="order.order_id" :value="order.order_id">
               Đơn hàng #{{ order.order_id }} - {{ order.receive_name }}
             </option>
           </select>
@@ -914,7 +930,7 @@
           <button @click="assignShipModal = false" class="border-2 border-secondary p-2">
             Hủy
           </button>
-          <button @click="assignOrderToShipper" :disabled="!selectedOrder" class="th-p-btn">
+          <button @click="assignOrderToShipper" :disabled="!selectedOrderId" class="th-p-btn">
             Xác nhận
           </button>
         </div>
@@ -979,6 +995,22 @@ import router from "../router";
 import { useMailStore } from "../stores/mail";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
+
+const req = ref({});
+
+onMounted(() => {
+  useAdminStore().getRequestWatches()
+    .then(response => {
+      req.value = response.reduce((map, watch) => {
+        map[watch.appraise_watch] = watch;
+        return map;
+      }, {});
+      console.log("BBB", req.value);
+    })
+    .catch(error => {
+      console.error("Error fetching request watches:", error);
+    });
+});
 
 const currentSection = ref('profit-overview');
 
@@ -1119,6 +1151,30 @@ const filters = reactive({
   }
 });
 
+const selectedAppraiser = ref(null)
+
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    
+    const pad = (num, size = 2) => String(num).padStart(size, '0');
+    
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    const milliseconds = pad(date.getMilliseconds(), 6); // Adjust for microseconds
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
+const assignWatch = () => {
+  console.log(req.value[selectedWatch.value.watch_id].request_id);
+  const timestamp = date.value.getTime();
+  adminStore.assignWatchRequest(req.value[selectedWatch.value.watch_id].request_id, selectedAppraiser.value.member_id ,formatTimestamp(timestamp));
+  showAssignModal.value = !showAssignModal.value
+}
+
 const toggleFilter = () => {
   showFilter.value = !showFilter.value;
 };
@@ -1208,25 +1264,53 @@ const selectedWatch = ref(null);
 const assignShipModal = ref(false);
 const showShipperOrdersModal = ref(false);
 const selectedShipper = ref(null);
-const selectedOrder = ref(null);
-const pendingOrders = ref([]);
+const selectedOrderId = ref(null);
+const selectedOrder = computed(() => {
+  return getShipOrder.value.find(order => order.order_id === selectedOrderId.value) || null;
+});
+
+const logSelection = () => {
+  console.log('Selected Order ID:', selectedOrderId.value);
+  console.log('Selected Order:', selectedOrder.value);
+};
+
+
 const assignedOrders = ref([]);
 
-const openAssign = async (shipper) => {
+const openAssign = async (shipper, order) => {
   assignShipModal.value = true;
   selectedShipper.value = shipper;
-  pendingOrders.value = []; // Replace with actual API call
+  selectedOrderId.value = order;
 };
 
 const openDetail = async (shipper) => {
   showShipperOrdersModal.value = true;
   selectedShipper.value = shipper;
+  console.log(selectedOrder.value);
   assignedOrders.value = []; // Replace with actual API call
 };
 
 const openAssignModal = async (watch) => {
   selectedWatch.value = watch;
-  showAssignModal.value = true;  
+  showAssignModal.value = true;
+  console.log("RRRR",watch);
+};
+
+const assignOrderToShipper = () => {
+  console.log('assignOrderToShipper called');
+  console.log('Selected Order ID:', selectedOrderId.value);
+  console.log('Selected Order:', selectedOrder.value);
+  console.log('Selected Shipper:', selectedShipper.value.member_id);
+  
+    if (selectedOrder.value) {
+      // Your logic to assign the order to the shipper
+      useAdminStore().assignOrderToShipper(selectedShipper.value.member_id ,selectedOrderId.value)
+      console.log('Assigning order:', selectedOrderId.value, 'to shipper:', selectedShipper.value.member_id);
+    } else {
+      console.log('No order selected');
+    }
+  
+
 };
 
 function setGreeting() {
@@ -1336,6 +1420,10 @@ const getAppraisers = computed(() => {
 });
 
 const getShipOrder = computed(() => {
+  console.log(adminStore.orders.filter(order => 
+    order.state === 'PENDING'
+  ));
+  
   return adminStore.orders.filter(order => 
     order.state === 'PENDING'
   );
