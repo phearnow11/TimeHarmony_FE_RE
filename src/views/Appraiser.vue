@@ -55,33 +55,40 @@
           <i :class="['material-icons', column.iconColor]">{{ column.icon }}</i>
           {{ column.name }}
         </h2>
-        <draggable
+                <draggable
           v-model="column.tasks"
           :group="'tasks'"
-          item-key="id"
+          item-key="request_id"
           @end="onDragEnd"
           :class="[
             'flex-grow min-h-[200px] p-2 bg-[#343432]',
             { 'list-none': viewMode === 'kanban' },
           ]"
         >
-          <template #item="{ element }">
+
+            <template #item="{ element }">
             <div class="bg-[#1b1b1b] p-4 shadow-md cursor-move mb-2 box">
               <h3 class="text-primary font-bold text-md">
-                {{ element.title }}
+                Mã yêu cầu: {{ element.request_id }}
               </h3>
+              <p class="text-sm text-[whitesmoke]">ID Đồng hồ: {{ element.watch_id }}</p>
+              
               <p class="text-sm text-[whitesmoke]">
-                {{ formatPriceVND(element.price) }}
+                Ghi chú: {{ element.note }}
               </p>
-              <p class="text-sm text-[whitesmoke]">{{ element.id }}</p>
               <p class="text-xs text-[whitesmoke] mt-2 mb-2">
-                Thời gian: {{ element.dueDate }}
+                Thời gian hẹn: {{ element.dueDate }}
+              </p>
+              <p class="text-xs text-[whitesmoke] mt-2 mb-2">
+                Ngày tạo: {{ element.createdAt }}
+              </p>
+              <p class="text-xs text-[whitesmoke] mt-2 mb-2">
+                Trạng thái: {{ element.status }}
               </p>
               <router-link
-                :to="`/detail/${element.id}`"
+                :to="`/detail/${element.watch_id}`"
                 class="mt-2 hover-underline-animation"
-                >Xem chi tiết</router-link
-              >
+              >Xem chi tiết</router-link>
             </div>
           </template>
         </draggable>
@@ -97,9 +104,9 @@
         class="bg-[#1b1b1b] p-6 shadow-lg w-full max-w-3xl my-8 max-h-[80vh] overflow-y-auto"
       >
         <h2 class="text-lg font-semibold mb-4">
-          Xác nhận Duyệt <br />{{ draggedItem.title }}
+          Xác nhận Duyệt <br />{{ draggedItem.watch_id }}
         </h2>
-        <span>ID:{{ draggedItem.id }}</span>
+        <span>ID: {{ draggedItem.request_id }}</span>
         <div class="form-content mb-6">
           <div class="form__group field w-full">
             <input
@@ -179,7 +186,8 @@
             <h3 class="text-xl mb-4">Tính năng</h3>
             <div class="form-content mb-4">
               <div class="form__group field">
-                <input type="text" class="form__field" placeholder="Lịch" />
+                <input type="text" class="form__field" placeholder="Lịch" 
+                v-model="watchData.calender"/>
                 <label class="form__label">Lịch</label>
               </div>
             </div>
@@ -189,6 +197,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.feature"
                 />
                 <label class="form__label">Tính năng</label>
               </div>
@@ -199,6 +208,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.movement"
                 />
                 <label class="form__label">Hoạt động</label>
               </div>
@@ -209,6 +219,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.function"
                 />
                 <label class="form__label">Chức năng</label>
               </div>
@@ -219,6 +230,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.engine"
                 />
                 <label class="form__label">Động cơ</label>
               </div>
@@ -229,6 +241,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.water_resistant"
                 />
                 <label class="form__label">Kháng nước</label>
               </div>
@@ -243,13 +256,15 @@
                   type="text"
                   class="form__field"
                   placeholder="Thương hiệu"
+                  v-model="watchData.dial_type"
                 />
                 <label class="form__label">Loại quay số</label>
               </div>
             </div>
             <div class="form-content mb-4">
               <div class="form__group field">
-                <input type="text" class="form__field" placeholder="Series" />
+                <input type="text" class="form__field" placeholder="Series" 
+                v-model="watchData.dial_color"/>
                 <label class="form__label">Màu sắc</label>
               </div>
             </div>
@@ -259,6 +274,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.crystal"
                 />
                 <label class="form__label">Pha lê</label>
               </div>
@@ -269,6 +285,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.second_makers"
                 />
                 <label class="form__label">Nhà sản xuất thứ hai</label>
               </div>
@@ -281,6 +298,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.band_color"
                 />
                 <label class="form__label">Màu sắc</label>
               </div>
@@ -291,6 +309,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.band_type"
                 />
                 <label class="form__label">Loại dây</label>
               </div>
@@ -301,6 +320,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.clasp"
                 />
                 <label class="form__label">Móc cài</label>
               </div>
@@ -311,6 +331,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.bracelet"
                 />
                 <label class="form__label">Vòng đeo</label>
               </div>
@@ -322,6 +343,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.bezel"
                 />
                 <label class="form__label">Khung viền</label>
               </div>
@@ -332,6 +354,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.bezel_material"
                 />
                 <label class="form__label">Chất liệu khung viền</label>
               </div>
@@ -342,6 +365,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.case_back"
                 />
                 <label class="form__label">Mặt sau</label>
               </div>
@@ -352,6 +376,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.casedimension"
                 />
                 <label class="form__label">Kích thước</label>
               </div>
@@ -362,6 +387,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.case_shape"
                 />
                 <label class="form__label">Hình dạng vỏ</label>
               </div>
@@ -373,6 +399,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.brand"
                 />
                 <label class="form__label">Thương hiệu</label>
               </div>
@@ -383,6 +410,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.series"
                 />
                 <label class="form__label">Dòng sản phẩm</label>
               </div>
@@ -393,6 +421,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.model"
                 />
                 <label class="form__label">Mẫu</label>
               </div>
@@ -403,6 +432,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.style_type"
                 />
                 <label class="form__label">Phong cách</label>
               </div>
@@ -413,6 +443,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.sub_class"
                 />
                 <label class="form__label">Lớp phụ</label>
               </div>
@@ -423,6 +454,7 @@
                   type="text"
                   class="form__field"
                   placeholder="Tính năng"
+                  v-model="watchData.made_label"
                 />
                 <label class="form__label">Nhãn thực hiện</label>
               </div>
@@ -504,6 +536,8 @@ if (useUserStore().role != "ROLE_STAFF") {
   router.push("/");
 }
 
+
+
 const id = ref("");
 const authStore = useAuthStore();
 const viewMode = ref("kanban");
@@ -575,6 +609,50 @@ const watchData = reactive({
   case_shape: "",
 });
 
+const clear = () => {
+  (watchData.name = ""),
+    (watchData.price = ""),
+    (watchData.description = ""),
+    (watchData.brand = ""),
+    (watchData.series = ""),
+    (watchData.model = ""),
+    (watchData.gender = ""),
+    (watchData.style_type = ""),
+    (watchData.sub_class = ""),
+    (watchData.made_label = ""),
+    (watchData.calender = ""),
+    (watchData.feature = ""),
+    (watchData.movement = ""),
+    (watchData.function = ""),
+    (watchData.engine = ""),
+    (watchData.water_resistant = ""),
+    (watchData.band_color = ""),
+    (watchData.band_type = ""),
+    (watchData.clasp = ""),
+    (watchData.bracelet = ""),
+    (watchData.dial_type = ""),
+    (watchData.dial_color = ""),
+    (watchData.crystal = ""),
+    (watchData.second_makers = ""),
+    (watchData.bezel = ""),
+    (watchData.bezel_material = ""),
+    (watchData.case_back = ""),
+    (watchData.casedimension = ""),
+    (watchData.case_shape = "");
+};
+
+const unisexGender = () => {
+  watchData.gender = "Unisex";
+};
+
+const maleGender = () => {
+  watchData.gender = "Male";
+};
+
+const femaleGender = () => {
+  watchData.gender = "Female";
+};
+
 const validatePrice = () => {
   const price = Number(watchData.price);
   if (price < 100000) {
@@ -610,18 +688,19 @@ const search = () => {
   columns.value.forEach((column) => {
     if (searchTerm === "") {
       // If search is empty, restore original tasks
-      if (column.name === "Chưa duyệt")
+      if (column.name === "Chưa duyệt" && staffStore.unapprovedWatches)
         column.tasks = staffStore.unapprovedWatches.map(mapWatchToTask);
-      if (column.name === "Đã được duyệt")
+      if (column.name === "Đã được duyệt" && staffStore.approvedWatches)
         column.tasks = staffStore.approvedWatches.map(mapWatchToTask);
-      if (column.name === "Không chấp thuận")
+      if (column.name === "Không chấp thuận" && staffStore.deleteWatches)
         column.tasks = staffStore.deleteWatches.map(mapWatchToTask);
     } else {
       // Filter tasks based on search term
       column.tasks = column.tasks.filter(
         (task) =>
-          task.id.toString().toLowerCase().includes(searchTerm) ||
-          task.title.toLowerCase().includes(searchTerm)
+          task.watch_id.toString().toLowerCase().includes(searchTerm) ||
+          task.request_id.toString().toLowerCase().includes(searchTerm) ||
+          task.status.toLowerCase().includes(searchTerm)
       );
     }
   });
@@ -629,10 +708,12 @@ const search = () => {
 
 // Helper function to map watch data to task object
 const mapWatchToTask = (watch) => ({
-  id: watch.watch_id,
-  title: watch.watch_name,
-  price: watch.price,
-  dueDate: new Date(watch.watch_create_date).toLocaleDateString(),
+  watch_id: watch.watch_id,
+  request_id: watch.request_id,
+  note: watch.note,
+  dueDate: new Date(watch.appointment_date).toLocaleDateString(),
+  createdAt: new Date(watch.created_at).toLocaleDateString(),
+  status: watch.status
 });
 
 watch(id, () => {
@@ -651,47 +732,51 @@ const filteredColumns = computed(() => {
 });
 
 onMounted(async () => {
-  const unapprovedWatches = await staffStore.getAllWatch(0);
-  unapprovedWatches.forEach((watch) => {
-    if (watch.seller && watch.seller.member_id) {
-      watchSellerMap.value.set(watch.watch_id, watch.seller.member_id);
-      console.log(
-        "Seller Member ID of Unapprove Watch: " + watch.seller.member_id
-      );
-    } else {
-      console.log(
-        "Seller Member ID not available for watch: " + watch.watch_id
-      );
-    }
-  });
-
-  await staffStore.getAllWatch(0);
-  await staffStore.getAllWatch(1);
-  await staffStore.getAllWatch(2);
-  const pendingWatches = await staffStore.getAllWatch(3);
+  const aid = authStore.user_id
+  await staffStore.getRequestFromAdmin(aid);
+  
+  if (staffStore.unapprovedWatches) {
+    staffStore.unapprovedWatches.forEach((watch) => {
+      if (watch.seller && watch.seller.member_id) {
+        watchSellerMap.value.set(watch.watch_id, watch.seller.member_id);
+        console.log(
+          "Seller Member ID of Unapprove Watch: " + watch.seller.member_id
+        );
+      } else {
+        console.log(
+          "Seller Member ID not available for watch: " + watch.watch_id
+        );
+      }
+    });
+  }
 
   refreshColumns();
-  search(); // Apply initial search (which will show all items if search is empty)
+  search();
 
   console.log("Pending Watches:", JSON.stringify(pendingWatches, null, 2));
-
   columns.value[0].tasks = staffStore.unapprovedWatches.map((watch) => ({
-    id: watch.watch_id,
-    title: watch.watch_name,
-    price: watch.price,
-    dueDate: new Date(watch.watch_create_date).toLocaleDateString(),
+    watch_id: watch.watch_id,
+    request_id: watch.request_id,
+    note: watch.note,
+    dueDate: new Date(watch.appointment_date).toLocaleDateString(),
+    createdAt: new Date(watch.created_at).toLocaleDateString(),
+    status: watch.status
   }));
   columns.value[1].tasks = staffStore.approvedWatches.map((watch) => ({
-    id: watch.watch_id,
-    title: watch.watch_name,
-    price: watch.price,
-    dueDate: new Date(watch.watch_create_date).toLocaleDateString(),
+    watch_id: watch.watch_id,
+    request_id: watch.request_id,
+    note: watch.note,
+    dueDate: new Date(watch.appointment_date).toLocaleDateString(),
+    createdAt: new Date(watch.created_at).toLocaleDateString(),
+    status: watch.status
   }));
   columns.value[2].tasks = staffStore.deleteWatches.map((watch) => ({
-    id: watch.watch_id,
-    title: watch.watch_name,
-    price: watch.price,
-    dueDate: new Date(watch.watch_create_date).toLocaleDateString(),
+    watch_id: watch.watch_id,
+    request_id: watch.request_id,
+    note: watch.note,
+    dueDate: new Date(watch.appointment_date).toLocaleDateString(),
+    createdAt: new Date(watch.created_at).toLocaleDateString(),
+    status: watch.status
   }));
 });
 
@@ -700,30 +785,33 @@ const onDragEnd = (event) => {
     targetColumnName.value = event.to.parentElement
       .querySelector("h2")
       .textContent.trim();
-    draggedItemId.value = event.item
-      .querySelector("p:nth-child(3)")
-      .textContent.trim();
+    draggedItemId.value = event.item.__draggable_context.element.request_id; // Get the watch_id from the dragged element
+
     draggedItem.value = columns.value
       .flatMap((col) => col.tasks)
-      .find((task) => task.id === draggedItemId.value);
+      .find((task) => task.request_id === draggedItemId.value);
 
-    if (targetColumnName.value === "Đã được duyệt") {
-      showApproveModal.value = true;
-    } else if (targetColumnName.value === "Không chấp thuận") {
-      showDeleteModal.value = true;
-      reportContent.value = ""; // Clear previous content
-    } else if (targetColumnName.value === "Chưa duyệt") {
-      staffStore.getAllWatch(0);
-      refreshColumns();
+    if (draggedItem.value) {
+      if (targetColumnName.value === "Đã được duyệt") {
+        showApproveModal.value = true;
+      } else if (targetColumnName.value === "Không chấp thuận") {
+        showDeleteModal.value = true;
+        reportContent.value = "";
+      } else if (targetColumnName.value === "Chưa duyệt") {
+        staffStore.getRequestFromAdmin(authStore.user_id);
+        refreshColumns();
+      }
+    } else {
+      console.error("Không tìm thấy item được kéo");
     }
   }
 };
 
 const handleConfirm = async (type) => {
   if (type === "approve") {
-    await staffStore.approveWatch(draggedItemId.value);
     console.log(`ready to update ${draggedItemId.value}`);
     submit()
+    await staffStore.approveWatch(draggedItem.value.watch_id);
     showApproveModal.value = false;
   } else if (type === "unapprove") {
     if (!reportContent.value.trim()) {
@@ -785,6 +873,7 @@ const handleConfirm = async (type) => {
 const handleCancel = (type) => {
   if (type === "approve") {
     showApproveModal.value = false;
+    clear()
   } else if (type === "unapprove") {
     showDeleteModal.value = false;
   }
@@ -795,7 +884,7 @@ const refreshColumns = () => {
   columns.value[0].tasks = staffStore.unapprovedWatches.map(mapWatchToTask);
   columns.value[1].tasks = staffStore.approvedWatches.map(mapWatchToTask);
   columns.value[2].tasks = staffStore.deleteWatches.map(mapWatchToTask);
-  search(); // Apply search after refreshing columns
+  search();
 };
 
 const formatPriceVND = (price) => {
@@ -807,10 +896,10 @@ const formatPriceVND = (price) => {
 };
 
 const submit = () => {
-  console.log('submit updata data.');
-  
+  console.log('submit update data.');
+
   const data = {
-    price: watchData.price,
+    price: watchData.price.toString(),
     brand: watchData.brand,
     series: watchData.series,
     model: watchData.model,
@@ -838,7 +927,12 @@ const submit = () => {
     casedimension: watchData.casedimension,
     caseshape: watchData.case_shape,
   };
-  useStaffStore().updateWatch(draggedItemId.value, data);
+
+  console.log(data);
+  
+
+  useStaffStore().updateWatch(draggedItem.value.watch_id, data);
+  clear()
 };
 </script>
 
