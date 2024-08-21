@@ -474,6 +474,22 @@ import { useAuthStore } from "../stores/auth";
 const date = ref(new Date());
 const dateWarning = ref("");
 
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    
+    const pad = (num, size = 2) => String(num).padStart(size, '0');
+    
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hours = pad(date.getHours());
+    const minutes = pad(date.getMinutes());
+    const seconds = pad(date.getSeconds());
+    const milliseconds = pad(date.getMilliseconds(), 6); // Adjust for microseconds
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
+
 const validateDate = (selectedDate) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Reset time part for comparison
@@ -603,7 +619,11 @@ async function uploadHandle() {
       useUserStore().user_id,
       useUserStore().username
     );
-    useWatchStore().createRequestWatch(useAuthStore().user_id, response.data, watchData.description)
+
+    const timestamp = date.value.getTime();
+
+
+    useWatchStore().createRequestWatch(useAuthStore().user_id, response.data, watchData.description, formatTimestamp(timestamp))
     console.log("Upload successful", response.data);
 
     await new Promise((resolve) => setTimeout(resolve, 2000));

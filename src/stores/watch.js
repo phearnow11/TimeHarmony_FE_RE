@@ -262,10 +262,11 @@ export const useWatchStore = defineStore("watch", {
       }
     },
 
-    createRequestWatch(seller_id, watch_id, note){
+    createRequestWatch(seller_id, watch_id, note, date){
       axios.post(`${api}/seller/create/appraise-request/${seller_id}`,{
         watch_id: watch_id,
-        note: note
+        note: note,
+        appointment_date: date
       })
       .then((res)=>{
         console.log(res);  
