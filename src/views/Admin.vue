@@ -625,7 +625,7 @@
                 </button>
               </td>
               <td>
-                <button class="hover-underline-animation-r">Xoá</button>
+                <button class="hover-underline-animation-r" @click="deleteWatch(product.seller.member_id,product.watch_id)">Xoá</button>
               </td>
             </tr>
             </tbody>
@@ -1022,6 +1022,7 @@ import { useMailStore } from "../stores/mail";
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css'
 import Clock from '../components/Clock.vue'
+import { useWatchStore } from "../stores/watch";
 
 
 const req = ref({});
@@ -1040,6 +1041,11 @@ onMounted(() => {
       console.error("Error fetching request watches:", error);
     });
 });
+
+const deleteWatch = (sid, wid) => {
+  useWatchStore().deleteWatch(sid, wid)
+}
+
 
 const currentSection = ref('profit-overview');
 
