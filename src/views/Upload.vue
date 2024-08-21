@@ -633,7 +633,7 @@ async function uploadHandle() {
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
     localStorage.setItem("showUploadSuccessPopup", "true");
-    // window.location.reload();
+    window.location.reload();
   } catch (error) {
     console.error("Upload error", error);
   } finally {
