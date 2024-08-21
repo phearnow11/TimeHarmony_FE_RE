@@ -55,11 +55,11 @@
           <i :class="['material-icons', column.iconColor]">{{ column.icon }}</i>
           {{ column.name }}
         </h2>
-                <draggable
-          v-model="column.tasks"
-          :group="'tasks'"
-          item-key="request_id"
-          @end="onDragEnd"
+        <draggable
+  v-model="column.tasks"
+  :group="'tasks'"
+  item-key="request_id"
+  @end="onDragEnd"
           :class="[
             'flex-grow min-h-[200px] p-2 bg-[#343432]',
             { 'list-none': viewMode === 'kanban' },
@@ -522,7 +522,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch, reactive } from "vue";
-import draggable from "vuedraggable";
+import draggable from 'vuedraggable'
 import { useStaffStore } from "../stores/staff";
 import { useAuthStore } from "../stores/auth";
 import { useUserStore } from "../stores/user";
