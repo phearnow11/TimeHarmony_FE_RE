@@ -1226,8 +1226,15 @@ function formatTimestamp(timestamp) {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 const assignWatch = () => {
-  console.log(req.value[selectedWatch.value.watch_id].request_id);
+  console.log(req.value[selectedWatch.value.watch_id]);
   const timestamp = date.value.getTime();
+  console.log(formatTimestamp(timestamp));
+  
+  if(req.value[selectedWatch.value.watch_id].appraiser_assigned){
+    adminStore.updateRequest(selectedAppraiser.value.member_id, req.value[selectedWatch.value.watch_id].request_id, formatTimestamp(timestamp))
+    showAssignModal.value = !showAssignModal.value
+    return
+  }
   adminStore.assignWatchRequest(req.value[selectedWatch.value.watch_id].request_id, selectedAppraiser.value.member_id ,formatTimestamp(timestamp));
   showAssignModal.value = !showAssignModal.value
 }

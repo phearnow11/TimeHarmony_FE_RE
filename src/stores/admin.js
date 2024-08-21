@@ -535,7 +535,40 @@ export const useAdminStore = defineStore("admin", {
           console.log(err);    
         }
       )
-    }
+    },
+    async updateRequest(aid, rid, date) {
+      const token = useAuthStore().token;
+      if (!token) return;
+    
+      this.isLoading = true;
+      this.error = null;
+    
+      try {
+        const response = await axios.patch(
+          `${api}/admin/update/request?rid=${rid}`,
+          {
+            date: date,
+            appraiser_id: aid
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+    
+        // Log the response to the console
+        console.log("Update Request Response:", response.data);
+    
+        return response.data;
+      } catch (error) {
+        console.error("Error updating request:", error);
+        this.error = error.message || "Failed to update request";
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    }    
   },
   getters: {
     getTopThree(state) {
@@ -583,5 +616,7 @@ export const useAdminStore = defineStore("admin", {
           new Date(transaction.create_at).toLocaleDateString().toLowerCase().includes(lowerQuery)
       );
     },
+
+    
   }
 });
