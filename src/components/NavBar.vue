@@ -11,14 +11,15 @@
   class="myheader grid grid-cols-6 gap-4 h-20 items-center sticky top-0 z-50 w-full pl-6 pr-6"
 >
     <div class="flex items-center justify-between col-span-1">
-      <side-bar />
+      <side-bar v-if="useUserStore().role !== 'ROLE_ADMIN' && useUserStore().role !== 'ROLE_STAFF'"/>
       <div class="flex justify-center items-center h-full">
         <router-link to="/">
           <img src="../assets/time-harmony.png" class="h-12" />
         </router-link>
       </div>
     </div>
-    <div class="ui-input-container col-span-3" @click="showHint = true">
+    <div v-if="useUserStore().role === 'ROLE_ADMIN' || useUserStore().role === 'ROLE_STAFF'" class="ui-input-container col-span-3"></div>
+    <div v-else class="ui-input-container col-span-3" @click="showHint = true">
       <input
         required
         placeholder="Tìm kiếm"
