@@ -620,15 +620,20 @@ async function uploadHandle() {
       useUserStore().username
     );
 
-    const timestamp = date.value.getTime();
+    const timestamp = date.value;
+       
 
+    console.log("seller: ", useAuthStore().user_id);
+      console.log("watch id: ", response.data);
+      console.log("note: ", watchData.description);
+      console.log("date: ", formatTimestamp(timestamp));
 
-    useWatchStore().createRequestWatch(useAuthStore().user_id, response.data, watchData.description, formatTimestamp(timestamp))
+    useWatchStore().createRequestWatch(useAuthStore().user_id, response.data, watchData.description, formatTimestamp(timestamp).toString())
     console.log("Upload successful", response.data);
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
     localStorage.setItem("showUploadSuccessPopup", "true");
-    window.location.reload();
+    // window.location.reload();
   } catch (error) {
     console.error("Upload error", error);
   } finally {
