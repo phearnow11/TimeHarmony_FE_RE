@@ -363,10 +363,15 @@ const scrollToBottom = () => {
 };
 
 const hide = (u) => {
-  console.log("hide ",u?.user_id)
+  console.log("hide ", u?.user_id);
   useChatStore().hide(u?.user_id)
-  window.location.reload()
-}
+    .then(() => {
+      window.location.reload();
+    })
+    .catch((error) => {
+      console.error('Error during hide:', error);
+    });
+};
 
 </script>
 
