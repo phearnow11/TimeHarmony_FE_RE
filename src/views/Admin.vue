@@ -84,66 +84,16 @@
     <main class="flex-1 p-6 overflow-y-auto">
       <!-- Tổng quan lợi nhuận -->
       <section v-if="currentSection === 'profit-overview'" class="mb-6">
-          <div class="back w-full p-4 rounded-lg shadow">
+        <div class="w-full flex justify-center p-2">
+          <h2 class="text-2xl font-semibold mb-4">Tổng Quan Thông Tin</h2>
+        </div>
+        <div class="back w-full p-1 rounded-lg shadow mb-5">
             <h2 class="flex text-2xl font-semibold justify-center">Top 3 Hãng Được Đăng Bán Nhiều Nhất</h2>
             <ol>
               <li class="w-full flex justify-center p-1 text-xl" v-for="(item, index) in topThreeWatch" :key="item.brand">
                 {{ index + 1 }}. {{ item.brand }} - {{ item[""] }} chiếc
               </li>
             </ol>
-          </div>
-        <div class="w-full justify-between flex p-5">
-          <h2 class="text-2xl font-semibold mb-4">Tổng Quan Lợi Nhuận</h2>
-     <div class="relative">
-    <span @click="toggleFilter" class="text-xl h-8 cursor-pointer hover-underline-animation inline-block">
-      <i class="fa fa-filter"></i> Lọc dữ liệu biểu đồ doanh thu
-    </span>
-    <div v-if="showFilter" class="filter-panel mt-2 p-4 back rounded-md absolute right-2 z-10 shadow-lg" style="min-width: 400px;">
-      <div class="space-y-4">
-        <div class="flex flex-col">
-          <label class="container flex justify-start items-center text-center gap-2 mb-2">
-            <input type="checkbox" v-model="selectedFilter" value="yearMonthDay" @change="handleFilterChange">
-            <svg viewBox="0 0 64 64" height="1em">
-              <path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16" pathLength="575.0541381835938" class="path"></path>
-            </svg>
-            <span>Year, Month, Day</span>
-          </label>
-          <div v-if="selectedFilter.includes('yearMonthDay')" class="flex space-x-2">
-            <div class="form__group field flex-1">
-              <VueDatePicker class="pt-2" v-model="filters.yearMonthDay.from" placeholder="Từ ngày" :format="'yyyy-MM-dd'" :max-date="new Date()" @input="validateYearMonthDayInput('from')"></VueDatePicker>
-              <label for="min_yearMonthDay_date" class="form__label">From (yyyy-mm-dd)</label>
-            </div>
-            <div class="form__group field flex-1">
-              <VueDatePicker class="pt-2" v-model="filters.yearMonthDay.to" placeholder="Đến ngày" :format="'yyyy-MM-dd'" :min-date="filters.yearMonthDay.from" :max-date="new Date()" @input="validateYearMonthDayInput('to')"></VueDatePicker>
-              <label for="max_yearMonthDay_date" class="form__label">To (yyyy-mm-dd)</label>
-            </div>
-          </div>
-        </div>
-        <div class="flex flex-col">
-          <label class="container flex justify-start items-center text-center gap-2 mb-2">
-            <input type="checkbox" v-model="selectedFilter" value="yearMonth" @change="handleFilterChange">
-            <svg viewBox="0 0 64 64" height="1em">
-              <path d="M 0 16 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 16 L 32 48 L 64 16 V 8 A 8 8 90 0 0 56 0 H 8 A 8 8 90 0 0 0 8 V 56 A 8 8 90 0 0 8 64 H 56 A 8 8 90 0 0 64 56 V 16" pathLength="575.0541381835938" class="path"></path>
-            </svg>
-            <span>Year, Month</span>
-          </label>
-          <div v-if="selectedFilter.includes('yearMonth')" class="flex space-x-2">
-            <div class="form__group field flex-1">
-              <VueDatePicker class="pt-2" v-model="filters.yearMonth.from" placeholder="Từ tháng" :format="'yyyy-MM'" :min-date="new Date(new Date().getFullYear(), new Date().getMonth() - 11, 1)" :max-date="new Date()" @input="validateYearMonthInput('from')"></VueDatePicker>
-              <label for="min_yearMonth_date" class="form__label">From (yyyy-mm)</label>
-            </div>
-            <div class="form__group field flex-1">
-              <VueDatePicker class="pt-2" v-model="filters.yearMonth.to" placeholder="Đến tháng" :format="'yyyy-MM'" :min-date="filters.yearMonth.from" :max-date="new Date()" @input="validateYearMonthInput('to')"></VueDatePicker>
-              <label for="max_yearMonth_date" class="form__label">To (yyyy-mm)</label>
-            </div>
-          </div>
-        </div>
-        <div class="flex justify-center">
-          <button @click="applyFilters" class="mt-4 th-p-btn px-4 py-2 rounded">Áp dụng</button>
-        </div>
-      </div>
-    </div>
-  </div>
         </div>
 
         <div class="mb-4">
@@ -162,23 +112,31 @@
             <p class="text-xl font-medium">Số lượng đơn đặt thành công: {{ numSuccessOrder }}</p>
           </div>
           <div class="back p-4 rounded-lg shadow">
-            <p class="text-xl font-medium">Chi Phí Tổng: {{ currency(totalAmountOrder) }}</p>
+            <p class="text-xl font-medium">Số tiền trang web giữ: {{ currency(totalAmountOrder) }}</p>
           </div>
           <div class="back p-4 rounded-lg shadow">
             <p class="text-xl font-medium">Lợi Nhuận Tổng: {{ currency(totalAmountProfit) }}</p>
           </div>
         </div>
+        <div class="w-full flex justify-center p-5">
+          <h2 class="text-2xl font-semibold mb-4">Tổng Quan Lợi Nhuận</h2>
+        </div>
         <div v-if="showCharts" class="grid  grid-cols-2 gap-6 mb-6">
-          <div class="back-4 rounded-lg back shadow">
-            <canvas ref="revenueChart"></canvas>
-          </div>
-          <div class="back p-4 rounded-lg shadow">
-            <canvas ref="costChart"></canvas>
+          <div>
+            <div class="date-filter mb-5">
+              <label class="mr-3" for="startDate">From:</label>
+              <input type="date" class="p-2 border bg-black-99 rounded" id="startDate" v-model="startDate" @change="updateChart">
+              
+              <label class="mx-5" for="endDate">To:</label>
+              <input type="date" class="p-2 border bg-black-99 rounded" id="endDate" v-model="endDate" @change="updateChart">
+            </div>
+            <div class="back p-4 rounded-lg shadow">
+
+              <canvas ref="revenueChart"></canvas>
+            </div>
           </div>
         </div>
-        <div class="back p-4 rounded-lg shadow">
-          <canvas ref="overviewChart"></canvas>
-        </div>
+        
       </section>
       
       <!-- Quản trị người dùng -->
@@ -1046,9 +1004,6 @@ const deleteWatch = (sid, wid) => {
   useWatchStore().deleteWatch(sid, wid)
 }
 
-
-const currentSection = ref('profit-overview');
-
 const date = ref(new Date());
 const dateWarning = ref('');
 
@@ -1096,15 +1051,6 @@ watch(date, (newDate) => {
   validateDate(newDate);
 });
 
-const formatBoxDate = (date) => {
-  const day = date.getDate();
-  const month = date.getMonth()+1
-  const year = date.getFullYear()
-  const hour = date.getHours()
-  const minute = date.getMinutes()
-  
-  return `${day}/${month}/${year} vào lúc ${hour}:${minute}`
-}
 
 const logout = () => {
   console.log(1);
@@ -1179,11 +1125,9 @@ const adminStore = useAdminStore();
 
 
 // State variables
-const userId = ref("");
 const isBanModalOpen = ref(false);
 const banMessage = ref("");
 const selectedMember = ref(null);
-const showCharts = ref(false);
 
 const qMembers = ref('');
 const qStaff = ref('');
@@ -1191,13 +1135,9 @@ const qWatches = ref('');
 const qPendingWatches = ref('')
 const qOrders = ref('');
 const nOrders = ref('');
-const topThree = ref('')
 
 // Chart
-const overviewChart = ref(null);
-const revenueChart = ref(null);
-const costChart = ref(null);
-const profitChart = ref(null);
+
 // Chart variable
 
 //Chart filter
@@ -1293,76 +1233,8 @@ const assignWatch = () => {
     });
 };
 
-const toggleFilter = () => {
-  showFilter.value = !showFilter.value;
-};
-
-const handleFilterChange = () => {
-  if (selectedFilter.value.length > 1) {
-    const lastSelectedFilter = selectedFilter.value[selectedFilter.value.length - 1];
-    selectedFilter.value = [lastSelectedFilter];
-  }
-
-  if (!selectedFilter.value.includes('yearMonthDay')) {
-    filters.yearMonthDay.from = null;
-    filters.yearMonthDay.to = null;
-  }
-
-  if (!selectedFilter.value.includes('yearMonth')) {
-    filters.yearMonth.from = null;
-    filters.yearMonth.to = null;
-  }
-};
-
-const validateYearMonthDayInput = (type) => {
-  const dateValue = new Date(filters.yearMonthDay[type]);
-  const currentDate = new Date();
-
-  if (type === 'from') {
-    if (dateValue > currentDate) {
-      filters.yearMonthDay.from = currentDate.toISOString().slice(0, 10);
-    }
-  } else {
-    if (filters.yearMonthDay.from && new Date(filters.yearMonthDay.to) < new Date(filters.yearMonthDay.from)) {
-      filters.yearMonthDay.to = filters.yearMonthDay.from;
-    }
-  }
-};
-
-const validateYearMonthInput = (type) => {
-  const dateValue = new Date(filters.yearMonth[type]);
-  const currentDate = new Date();
-
-  if (type === 'from') {
-    if (dateValue.getFullYear() < currentDate.getFullYear() || (dateValue.getFullYear() === currentDate.getFullYear() && dateValue.getMonth() < currentDate.getMonth())) {
-      filters.yearMonth.from = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`;
-    }
-  } else {
-    if (filters.yearMonth.from && new Date(filters.yearMonth.to) < new Date(filters.yearMonth.from)) {
-      filters.yearMonth.to = filters.yearMonth.from;
-    }
-  }
-};
-
-const applyFilters = () => {
-  const activeFilters = {
-    yearMonthDay: selectedFilter.value.includes('yearMonthDay') ? filters.yearMonthDay : null,
-    yearMonth: selectedFilter.value.includes('yearMonth') ? filters.yearMonth : null
-  };
-  console.log('Applied filters:', activeFilters);
-  // Ở đây bạn sẽ gọi hàm để áp dụng bộ lọc vào dữ liệu của bạn
-};
-//Chart filter
-
-const selectedTransaction = ref(null);
 const greeting = ref("");
-
 const openPromote = ref(false)
-
-let overviewChartInstance = null;
-let revenueChartInstance = null;
-let costChartInstance = null;
-let profitChartInstance = null;
 
 // Error state
 const error = ref(null);
@@ -1460,38 +1332,6 @@ const promote = () => {
 
 
 
-const createCharts = () => {
-  if (currentSection.value !== 'profit-overview') return;
-
-  // Destroy existing chart instances
-  if (overviewChartInstance) overviewChartInstance.destroy();
-  if (revenueChartInstance) revenueChartInstance.destroy();
-  if (costChartInstance) costChartInstance.destroy();
-  if (profitChartInstance) profitChartInstance.destroy();
-
-  nextTick(() => {
-    showCharts.value = true;
-    nextTick(() => {
-      createOverviewChart();
-      createRevenueChart();
-      createCostChart();
-      createProfitChart();
-    });
-  });
-};
-
-watch(currentSection, (newSection, oldSection) => {
-  if (newSection === 'profit-overview') {
-    if (oldSection !== 'profit-overview') {
-      showCharts.value = false;
-      nextTick(() => {
-        createCharts();
-      });
-    }
-  } else {
-    showCharts.value = false;
-  }
-});
 // Fetch data from the store on component mount
 onMounted(async () => {
   try {
@@ -1501,11 +1341,10 @@ onMounted(async () => {
     await adminStore.getWatches();
     await adminStore.getOrders();
     await adminStore.getOrdersNull();
-  setGreeting();
-
-  if (currentSection.value === 'profit-overview') {
-    createCharts();
-  }
+    setGreeting();
+    if (currentSection.value === 'profit-overview') {
+      await createCharts();
+    }
   } catch (err) {
     console.error("Error fetching data:", err);
     error.value = "Failed to fetch initial data. Please try refreshing the page.";
@@ -1936,16 +1775,7 @@ const sendEmail = async (transactionNo, member_id) => {
     }
   
 };
-// Compute financial metrics with error handling
-const totalCost = computed(() => {
-  try {
-    return filteredWatches.value.reduce((sum, product) => sum + (product?.price || 0), 0);
-  } catch (err) {
-    console.error("Error calculating totalCost:", err);
-    error.value = "Error calculating total cost. Please try again.";
-    return 0;
-  }
-});
+
 
 const selectedMonth = ref(new Date().toISOString().slice(0, 7));
 const numSuccessOrder = ref(0);
@@ -1971,164 +1801,156 @@ const updateOrderStats = async () => {
     }
 
 
+//Chart Showing
+const currentSection = ref('profit-overview');
+const showCharts = ref(false);
+const revenueChartInstance = ref(null);
+const revenueChart = ref(null);
 
-const totalRevenue = computed(() => {
+
+// Add date filter refs
+const startDate = ref(new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0]); // Default to start of current year
+const endDate = ref(new Date().toISOString().split('T')[0]); // Default to today
+
+const fetchAndProcessRevenueData = async (start, end) => {
   try {
-    return 1
+    const response = await adminStore.getOrderRevenue(start, end);
+    console.log("API Response:", JSON.stringify(response, null, 2));
+    
+    if (!response) {
+      throw new Error("Response is undefined");
+    }
+
+    if (typeof response !== 'object') {
+      throw new Error(`Unexpected response type: ${typeof response}`);
+    }
+
+    let rawData;
+    if (Array.isArray(response)) {
+      rawData = response;
+    } else if (response.data && Array.isArray(response.data)) {
+      rawData = response.data;
+    } else {
+      throw new Error("Unable to find array data in response");
+    }
+
+    const monthlyRevenue = new Array(12).fill(0);
+
+    rawData.forEach(item => {
+      if (item && item.date && item.daily_revenue !== undefined) {
+        const date = new Date(item.date);
+        const month = date.getMonth();
+        monthlyRevenue[month] += parseFloat(item.daily_revenue);
+      } else {
+        console.warn("Invalid item in rawData:", item);
+      }
+    });
+
+    return monthlyRevenue;
   } catch (err) {
-    console.error("Error calculating totalRevenue:", err);
-    error.value = "Error calculating total revenue. Please try again.";
-    return 0;
+    console.error("Error fetching revenue data:", err);
+    error.value = "Failed to fetch revenue data. Please try refreshing the page.";
+    return new Array(12).fill(0);
   }
-});
+};
 
-const totalProfit = computed(() => totalRevenue.value * 0.02);
+const createMonthlyRevenueChart = async () => {
+  try {
+    const monthlyRevenue = await fetchAndProcessRevenueData(startDate.value, endDate.value);
+    console.log("Processed monthly revenue:", monthlyRevenue);
 
-const monthlyData = computed(() => {
-  const currentMonth = new Date().getMonth();
-  const data = Array(12).fill(0).map((_, index) => ({
-    revenue: index === currentMonth ? totalRevenue.value : 0,
-    cost: index === currentMonth ? totalCost.value : 0,
-    profit: index === currentMonth ? totalProfit.value : 0,
-  }));
-  return data;
-});
+    if (revenueChartInstance.value) revenueChartInstance.value.destroy();
 
-const createOverviewChart = () => {
-  const ctx = overviewChart.value.getContext('2d');
-  overviewChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-      datasets: [
-        {
-          label: 'Doanh Thu Tổng',
-          data: monthlyData.value.map(month => month.revenue),
+    if (!revenueChart.value) {
+      console.error("Canvas element not found");
+      return;
+    }
+
+    const ctx = revenueChart.value.getContext('2d');
+    revenueChartInstance.value = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+        datasets: [{
+          label: 'Doanh Thu Hằng Tháng',
+          data: monthlyRevenue,
+          borderColor: 'rgb(255, 99, 132)',
           backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return value.toLocaleString('vi-VN') + ' ₫';
+              }
+            }
+          }
         },
-        {
-          label: 'Chi Phí Tổng',
-          data: monthlyData.value.map(month => month.cost),
-          backgroundColor: 'rgba(54, 162, 235, 0.5)',
-        },
-        {
-          label: 'Lợi Nhuận Tổng',
-          data: monthlyData.value.map(month => month.profit),
-          backgroundColor: 'rgba(75, 192, 192, 0.5)',
-        }
-      ]
-    },
-    options: chartOptions
-  });
-};
-
-const createRevenueChart = () => {
-  const ctx = revenueChart.value.getContext('2d');
-  revenueChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-      datasets: [{
-        label: 'Doanh Thu Tổng',
-        data: monthlyData.value.map(month => month.revenue),
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        tension: 0.1
-      }]
-    },
-    options: chartOptions
-  });
-};
-
-const createCostChart = () => {
-  const ctx = costChart.value.getContext('2d');
-  costChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-      datasets: [{
-        label: 'Chi Phí Tổng',
-        data: monthlyData.value.map(month => month.cost),
-        borderColor: 'rgb(54, 162, 235)',
-        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-        tension: 0.1
-      }]
-    },
-    options: chartOptions
-  });
-};
-
-const createProfitChart = () => {
-  const ctx = profitChart.value.getContext('2d');
-  profitChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-      datasets: [{
-        label: 'Lợi Nhuận Tổng',
-        data: monthlyData.value.map(month => month.profit),
-        borderColor: 'rgb(75, 192, 192)',
-        backgroundColor: 'rgba(75, 192, 192, 0.5)',
-        tension: 0.1
-      }]
-    },
-    options: chartOptions
-  });
-};
-
-const chartOptions = {
-  responsive: true,
-  scales: {
-    y: {
-      beginAtZero: true,
-      ticks: {
-        callback: function(value) {
-          return value.toLocaleString('vi-VN') + ' ₫';
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed.y !== null) {
+                  label += context.parsed.y.toLocaleString('vi-VN') + ' ₫';
+                }
+                return label;
+              }
+            }
+          }
         }
       }
-    }
-  },
-  plugins: {
-    tooltip: {
-      callbacks: {
-        label: function(context) {
-          let label = context.dataset.label || '';
-          if (label) {
-            label += ': ';
-          }
-          if (context.parsed.y !== null) {
-            label += context.parsed.y.toLocaleString('vi-VN') + ' ₫';
-          }
-          return label;
-        }
-      }
-    }
+    });
+  } catch (err) {
+    console.error("Error creating revenue chart:", err);
+    error.value = "Failed to create revenue chart. Please try refreshing the page.";
   }
 };
 
-watch([totalRevenue, totalCost, totalProfit], () => {
-  if (overviewChartInstance) {
-    overviewChartInstance.data.datasets[0].data = monthlyData.value.map(month => month.revenue);
-    overviewChartInstance.data.datasets[1].data = monthlyData.value.map(month => month.cost);
-    overviewChartInstance.data.datasets[2].data = monthlyData.value.map(month => month.profit);
-    overviewChartInstance.update();
+const createCharts = async () => {
+  if (currentSection.value !== 'profit-overview') return;
+
+  await nextTick();
+  showCharts.value = true;
+  await nextTick();
+  await createMonthlyRevenueChart();
+};
+
+const updateChart = async () => {
+  if (currentSection.value === 'profit-overview') {
+    await createMonthlyRevenueChart();
   }
-  if (revenueChartInstance) {
-    revenueChartInstance.data.datasets[0].data = monthlyData.value.map(month => month.revenue);
-    revenueChartInstance.update();
+};
+
+watch(currentSection, async (newSection, oldSection) => {
+  if (newSection === 'profit-overview') {
+    if (oldSection !== 'profit-overview') {
+      showCharts.value = false;
+      await nextTick();
+      await createCharts();
+    }
+  } else {
+    showCharts.value = false;
   }
-  if (costChartInstance) {
-    costChartInstance.data.datasets[0].data = monthlyData.value.map(month => month.cost);
-    costChartInstance.update();
-  }
-  if (profitChartInstance) {
-    profitChartInstance.data.datasets[0].data = monthlyData.value.map(month => month.profit);
-    profitChartInstance.update();
-  }
-}, { deep: true });
+});
+
+
+
 // Format currency
-const currency = (value) => `${value.toLocaleString("vi-VN")} ₫`;
-
+const currency = (value) => {
+  if (value === undefined || value === null) {
+    return '0 ₫';
+  }
+  return `${Number(value).toLocaleString("vi-VN")} ₫`;
+};
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleString('vi-VN')

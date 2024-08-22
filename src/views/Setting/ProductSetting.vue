@@ -24,7 +24,7 @@
       <!-- Navigation links -->
       <div class="mb-6">
         <a href="#orders" class="mr-4 hover-underline-animation" @click="activeSection = 'orders'">Đồng hồ đã mua</a>
-        <a href="#purchases" class="mr-4 hover-underline-animation" @click="activeSection = 'purchases'">Đồng hồ đã đăng bán</a>
+        <a href="#purchases" class="mr-4 hover-underline-animation" @click="activeSection = 'purchases'">Đồng hồ chờ đóng gói</a>
         <a v-if="isStaff" href="#pending-watches" class="mr-4 hover-underline-animation" @click="activeSection = 'pending-watches'">Đồng hồ đang chờ người bán xác nhận</a>     
         <a v-if="isStaff" href="#shipping-orders" class="mr-4 hover-underline-animation" @click="handleShippingOrdersClick">Đơn hàng đang vận chuyển</a>
       </div>
@@ -78,7 +78,7 @@
 
       <!-- My Purchased Watches Section -->
       <div v-if="activeSection === 'purchases'" id="purchases">
-        <h2 class="text-2xl mb-4">Các đơn hàng đồng hồ đã đăng bán <button @click="refreshOrderData" class="fa fa-refresh text-gray-99 hover:text-secondary p-1 text-lg transition-colors duration-300"></button></h2>
+        <h2 class="text-2xl mb-4">Các đồng hồ đang chờ đóng gói<button @click="refreshOrderData" class="fa fa-refresh text-gray-99 hover:text-secondary p-1 text-lg transition-colors duration-300"></button></h2>
         <div class="table-container">
           <table class="w-full border-collapse table">
             <thead class="table-header">
