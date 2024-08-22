@@ -19,9 +19,15 @@ export const useChatStore = defineStore('chat', {
     haveNewMessage: false,
   }),
   actions: {
-    hide(user_id){
-      axios.delete(`${api}/chat/delete?user_id=${useAuthStore().user_id}&user_id2=${user_id}`)
-    },
+    hide(user_id) {
+      return axios.delete(`${api}/chat/delete?user_id=${useAuthStore().user_id}&user_id2=${user_id}`)
+        .then((response) => {
+          console.log('User hidden successfully:', response);
+        })
+        .catch((error) => {
+          console.error('Error hiding user:', error);
+        });
+    },    
 
     async addToChat(user_id){
       axios.post(`${api}/chat/addtochat?user_id=${useAuthStore().user_id}&user_id2=${user_id}`);

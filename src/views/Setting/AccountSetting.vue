@@ -108,7 +108,6 @@ import { onMounted } from 'vue';
 import { useUserStore } from '../../stores/user';
 import { useCloudinaryStore } from '../../stores/cloudinary';
 import { useMailStore } from '../../stores/mail';
-import { useChatStore } from '../../stores/chat';
 import { useRoute } from 'vue-router';
 import PopUp from '../../components/PopUp.vue';
 
@@ -121,7 +120,10 @@ const originalUser = reactive({});
 const changedFields = reactive({});
 
 const isPhoneValid = ref(true);
-const isEmailValid = useUserStore().isVerify;
+const isEmailValid = useUserStore()?.isVerify;
+
+console.log(isEmailValid);
+
 
 var api = import.meta.env.VITE_API_PORT;
 
@@ -129,21 +131,30 @@ const showPopup = ref(false);
 const route = useRoute();
 const verify = route.query.verify
 
-if(verify === `${user.email}:${user.user_id}` && useUserStore()?.isVerify == false){
-  useChatStore().sendMessage(`98f4b36e-bd11-4377-b538-2adf19b204b1`,`verify:${verify}`)
-  console.log(`send to bot`);
+if(verify && useUserStore()?.isVerify == false){
+  useMailStore().findVerify(user.user_id, verify)
+  console.log(`waiting`);
   message.value = 'Xác thực email thành công'
-  window.location.reload()
-  // showPopup.value = true;
 }
 
-console.log("V",useUserStore().isVerify);
+function generateVerificationCode(length = 6) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let code = '';
+  for (let i = 0; i < length; i++) {
+    code += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return code;
+}
+
 
 
 
 const verifyMail = async () => { 
+  useMailStore().deleteVerify(user.user_id)
+  const code = generateVerificationCode()
+  useMailStore().sendVerifyToEmail(user.user_id,user.email,code)
   const host = window.location.origin;
-  const link = `${host}/setting/profile?verify=${user.email}:${user.user_id}`;
+  const link = `${host}/setting/profile?verify=${code}`;
   const plainTextContent = `Bạn vui lòng bấm vào đường dẫn sau để xác thực email: ${link}`;
   const htmlContent = `Bạn vui lòng bấm vào <a href="${link}">đây</a> để xác thực email`;
   showPopup.value = true;

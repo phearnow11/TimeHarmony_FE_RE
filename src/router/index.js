@@ -3,6 +3,7 @@ import { useAuthStore } from "../stores/auth";
 import { useUserStore } from "../stores/user";
 import { useChatStore } from "../stores/chat";
 import { useAdminStore } from "../stores/admin";
+import { useMailStore } from "../stores/mail";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -242,8 +243,9 @@ router.beforeEach(async (to, from, next) => {
   if (user_id != null) {
     await userStore.loadUser(user_id);
 
-    var v = await useChatStore().findVerifyMail()
-    if(v && v.length>0){
+    var isVerify = await useMailStore().checkVerify(user_id)
+    if(isVerify){
+      useUserStore().isVerify = true
       console.log(useUserStore().isVerify);
     }
     

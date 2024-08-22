@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import axios from "axios";
 import { useAuthStore } from "./auth";
 import { useChatStore } from "./chat";
+import { useMailStore } from "./mail";
 var api = import.meta.env.VITE_API_PORT;
 export const useUserStore = defineStore("user", {
   state: () => ({
