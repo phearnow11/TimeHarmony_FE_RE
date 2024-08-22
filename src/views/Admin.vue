@@ -1232,18 +1232,66 @@ function formatTimestamp(timestamp) {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 const assignWatch = () => {
-  console.log(req.value[selectedWatch.value.watch_id]);
-  const timestamp = date.value.getTime();
-  console.log(formatTimestamp(timestamp));
+  let seller;
   
-  if(req.value[selectedWatch.value.watch_id].appraiser_assigned){
-    adminStore.updateRequest(selectedAppraiser.value.member_id, req.value[selectedWatch.value.watch_id].request_id, formatTimestamp(timestamp))
-    showAssignModal.value = !showAssignModal.value
-    return
-  }
-  adminStore.assignWatchRequest(req.value[selectedWatch.value.watch_id].request_id, selectedAppraiser.value.member_id ,formatTimestamp(timestamp));
-  showAssignModal.value = !showAssignModal.value
-}
+  // Check the selected watch's data
+  console.log(req.value[selectedWatch.value.watch_id]);
+  console.log("VVVV", selectedWatch.value.seller.member_id);
+  
+  // Fetch seller information as a promise
+  useUserStore()?.getUserInfo(selectedWatch.value.seller.member_id)
+    .then(result => {
+      seller = result;
+      console.log("GG",seller);
+
+      const timestamp = date.value.getTime();
+      console.log(formatTimestamp(timestamp));
+      
+      // Check if the appraiser has already been assigned
+      if (req.value[selectedWatch.value.watch_id].appraiser_assigned) {
+        adminStore.updateRequest(
+          selectedAppraiser.value.member_id, 
+          req.value[selectedWatch.value.watch_id].request_id, 
+          formatTimestamp(timestamp)
+        );
+        
+        showAssignModal.value = !showAssignModal.value;
+        useMailStore().send(//Kiem dinh vien
+          selectedAppraiser.value.email,
+          'Thông báo kiểm định',
+          `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDay()}/${date.value.getMonth()}/${date.value.getFullYear()}.`
+        );
+        useMailStore().send(//Seller
+        seller.email,
+        'Thông báo kiểm định',
+        `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDay()}/${date.value.getMonth()}/${date.value.getFullYear()}.`
+      );
+        return;
+      }
+      
+      // Assign the appraiser and send the email notification
+      adminStore.assignWatchRequest(
+        req.value[selectedWatch.value.watch_id].request_id, 
+        selectedAppraiser.value.member_id,
+        formatTimestamp(timestamp)
+      );
+      
+      showAssignModal.value = !showAssignModal.value;
+      useMailStore().send(//Kiem dinh vien
+        selectedAppraiser.value.email,
+        'Thông báo kiểm định',
+        `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDay()}/${date.value.getMonth()}/${date.value.getFullYear()}.`
+      );
+      useMailStore().send(//Seller
+        seller.email,
+        'Thông báo kiểm định',
+        `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDay()}/${date.value.getMonth()}/${date.value.getFullYear()}.`
+      );
+    })
+    .catch(error => {
+      console.error("Error fetching user info:", error);
+    });
+};
 
 const toggleFilter = () => {
   showFilter.value = !showFilter.value;
