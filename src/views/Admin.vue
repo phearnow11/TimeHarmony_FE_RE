@@ -231,6 +231,7 @@
                   <th class="p-2">Trạng Thái</th>
                   <th class="p-2">Cấm người dùng</th>
                   <th class="p-2">Thêm làm nhân viên</th>
+                  <th class="p-2">Nhắn tin</th>
                 </tr>
               </thead>
               <tbody>
@@ -275,6 +276,9 @@
                   >
                     Thêm làm nhân viên
                   </span>
+                  </td>
+                  <td class="p-2 text-center">
+                    <button class="hover-underline-animation" @click="mess(member.member_id)">Nhắn tin</button>
                   </td>
                 </tr>
               </tbody>
@@ -330,6 +334,7 @@
                   <th class="p-2">Username</th>
                   <th class="p-2">Trạng Thái</th>
                   <th class="p-2">Cấm người dùng</th>
+                  <th class="p-2">Nhắn tin</th>
                 </tr>
               </thead>
               <tbody>
@@ -367,6 +372,9 @@
                     >
                       Bỏ cấm người dùng
                     </div>
+                  </td>
+                  <td class="p-2 text-center">
+                    <button class="hover-underline-animation" @click="mess(member.member_id)">Nhắn tin</button>
                   </td>
                   
                 </tr>
@@ -452,6 +460,7 @@
                   <th class="p-2">Vai trò</th>
                   <th class="p-2">Trạng Thái</th>
                   <th class="p-2">Cấm người dùng</th>
+                  <th class="p-2">Nhắn tin</th>
                 </tr>
               </thead>
               <tbody>
@@ -499,6 +508,9 @@
                     >
                       Bỏ cấm người dùng
                     </div>
+                  </td>
+                  <td class="p-2 text-center">
+                    <button class="hover-underline-animation" @click="mess(member.member_id)">Nhắn tin</button>
                   </td>
                 </tr>
               </tbody>
@@ -764,6 +776,7 @@
                   <th class="p-2">Username</th>
                   <th class="p-2">Trạng Thái</th>
                   <th class="p-2">Hoạt động</th>
+                  <th class="p-2">Nhắn tin</th>
                 </tr>
               </thead>
               <tbody>
@@ -787,6 +800,9 @@
                   <td class="p-2 text-center justify-between">
                     <button @click="openAssign(member)" class="hover-underline-animation">Giao đơn</button>
                     <button @click="openDetail(member)" class="hover-underline-animation">Xem chi tiết</button>
+                  </td>
+                  <td class="p-2 text-center">
+                    <button class="hover-underline-animation" @click="mess(member.member_id)">Nhắn tin</button>
                   </td>
                 </tr>
               </tbody>
@@ -1936,6 +1952,14 @@ const sendEmail = async (transactionNo, member_id) => {
     }
   
 };
+
+const mess = (id) => {
+  useChatStore().addToChat(id)
+  .then(() => {
+    window.location.replace('/chat');
+  });
+};
+
 // Compute financial metrics with error handling
 const totalCost = computed(() => {
   try {
