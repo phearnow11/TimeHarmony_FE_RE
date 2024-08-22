@@ -1799,16 +1799,6 @@ const mess = (id) => {
   });
 };
 
-// Compute financial metrics with error handling
-const totalCost = computed(() => {
-  try {
-    return filteredWatches.value.reduce((sum, product) => sum + (product?.price || 0), 0);
-  } catch (err) {
-    console.error("Error calculating totalCost:", err);
-    error.value = "Error calculating total cost. Please try again.";
-    return 0;
-  }
-});
 
 const selectedMonth = ref(new Date().toISOString().slice(0, 7));
 const numSuccessOrder = ref(0);
