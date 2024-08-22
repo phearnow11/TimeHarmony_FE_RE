@@ -75,9 +75,16 @@
           </li>
         </ul>
       </nav>
-      <span @click="logout" class="ml-24  hover-underline-animation  cursor-pointer">
-            <i  class="fa fa-sign-out"></i> Đăng xuất
-      </span>
+      <div class="w-full flex justify-center items-center">
+        <a href="/chat">
+          <span class="mdi mdi-message-text-outline hover-underline-animation cursor-pointer"> Tin nhắn</span>
+          <span class="absolute top-5 newmessnoti text-blue-400" v-if="useChatStore().haveNewMessage">●</span>
+        </a>
+        <span class="mx-4">|</span>
+        <span @click="logout" class="hover-underline-animation cursor-pointer">
+          <i class="fa fa-sign-out"></i> Đăng xuất
+        </span>
+      </div>
     </aside>
 
     <!-- Main Content -->
@@ -1982,6 +1989,10 @@ const formatDate = (dateString) => {
 </script>
 
 <style scoped>
+
+.newmessnoti {
+  animation: blink 1s infinite; /* Áp dụng animation chớp chớp */
+}
 
 .filter-panel {
   width: 100%;

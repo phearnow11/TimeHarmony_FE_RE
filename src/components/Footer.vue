@@ -91,7 +91,7 @@ const date = computed(() => new Date().getFullYear());
 
 const shouldShowFooter = computed(() => {
       const hiddenRoutesWithoutAuth = ['/login', '/signup', '/chat', '/upload', '/order', '/cart', '/forgot'];
-      const hiddenRoutesWithAuth = ['/chat', '/order', '/orderconfirmation/:order_id'];
+      const hiddenRoutesWithAuth = ['/chat', '/admin', '/order', '/orderconfirmation/:order_id'];
 
       if (!auth.user_id && hiddenRoutesWithoutAuth.includes(route.path)) {
         return false;
