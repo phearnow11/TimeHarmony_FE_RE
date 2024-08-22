@@ -99,7 +99,6 @@
         </div>
         <div
           class="input-container flex w-full"
-          v-if="useUserStore().role != 'ROLE_ADMIN'"
         >
           <div class="u-input-container flex-grow">
             <input

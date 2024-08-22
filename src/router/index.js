@@ -266,7 +266,7 @@ router.beforeEach(async (to, from, next) => {
       } else {
         next('/error'); // Redirect to error page for non-admins
       }
-    } else if (userStore.role === 'ROLE_ADMIN' && !to.path.startsWith('/admin')) {
+    } else if (userStore.role === 'ROLE_ADMIN' && !to.path.startsWith('/admin') && !to.path.startsWith('/chat')) {
       next('/admin'); // Redirect admins to admin page if they try to access non-admin pages
     } else {
       next(); // Proceed for non-admin routes
