@@ -110,13 +110,14 @@
         <div class="form-content mb-6">
           <div class="form__group field w-full">
             <input
-              v-model="watchData.price"
-              type="number"
+              v-model="watchData.displayPrice"
+              type="text"
               class="form__field text-2xl"
-              placeholder="Price"
-              @input="validatePrice"
+              placeholder="Giá (VND)"
+              @input="formatPrice"
+              @blur="validatePrice"
             />
-            <label for="price" class="form__label text-xl">Giá</label>
+            <label for="price" class="form__label text-xl">Giá (VND)</label>
           </div>
           <p v-if="priceWarning" class="text-red-500 mt-2">
             {{ priceWarning }}
@@ -470,8 +471,10 @@
             Huỷ
           </button>
           <button
-            @click="handleConfirm('approve')"
+            @click="showConfirmationModal"
             class="btn"
+            :disabled="!isConfirmEnabled"
+            :class="{ 'opacity-50 cursor-not-allowed': !isConfirmEnabled }"
           >
             Xác nhận
           </button>
@@ -479,6 +482,20 @@
       </div>
     </div>
 
+    <div v-if="showConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-black-99 p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-bold mb-4">Xác nhận kiểm duyệt</h2>
+        <p>Bạn đã chắc chắn kiểm duyệt đồng hồ này với giá {{ watchData.displayPrice }} VND không?</p>
+        <div class="flex justify-end space-x-4 mt-4">
+          <button @click="closeConfirmModal" class="border-2 px-2 py-2 border-secondary">
+            Quay lại
+          </button>
+          <button @click="handleConfirm('approve')" class="btn">
+            Đồng ý
+          </button>
+        </div>
+      </div>
+    </div>
     <!-- Unapprove Confirmation Modal -->
     <div
       v-if="showDeleteModal"
@@ -580,6 +597,7 @@ const allWatches = computed(() => [
 const watchData = reactive({
   name: "",
   price: "",
+  displayPrice: "",
   description: "",
   brand: "",
   series: "",
@@ -612,6 +630,7 @@ const watchData = reactive({
 const clear = () => {
   (watchData.name = ""),
     (watchData.price = ""),
+    (watchData.displayPrice = ""),
     (watchData.description = ""),
     (watchData.brand = ""),
     (watchData.series = ""),
@@ -653,8 +672,21 @@ const femaleGender = () => {
   watchData.gender = "Female";
 };
 
+
+const formatPrice = () => {
+  // Loại bỏ tất cả ký tự không phải số
+  let value = watchData.displayPrice.replace(/\D/g, '');
+  
+  // Lưu giá trị số nguyên không có định dạng
+  watchData.price = value;
+  
+  // Định dạng số với dấu chấm làm dấu phân cách hàng nghìn
+  watchData.displayPrice = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
 const validatePrice = () => {
   const price = Number(watchData.price);
+
   if (price < 100000) {
     priceWarning.value = "Giá phải lớn hơn hoặc bằng 100.000 VND";
   } else if (price > 1000000000) {
@@ -664,13 +696,21 @@ const validatePrice = () => {
   }
 };
 
-const isFormValid = computed(() => {
-  return (
-    watchData.price.trim() !== "" &&
-    watchData.description.trim() !== "" &&
-    isPriceValid.value
-  );
+const isConfirmEnabled = computed(() => {
+  return watchData.price && Number(watchData.price) >= 100000 && watchData.description.trim() !== '';
 });
+
+const showConfirmModal = ref(false);
+
+const showConfirmationModal = () => {
+  if (isConfirmEnabled.value) {
+    showConfirmModal.value = true;
+  }
+};
+const closeConfirmModal = () => {
+  showConfirmModal.value = false;
+};
+
 
 watch(
   () => showApproveModal.value,
@@ -804,6 +844,7 @@ const handleConfirm = async (type) => {
     console.log(`ready to update ${draggedItemId.value}`);
     await submit()
     await staffStore.approveWatch(draggedItem.value.watch_id);
+    showConfirmModal.value = false;
     showApproveModal.value = false;
   } else if (type === "unapprove") {
     if (!reportContent.value.trim()) {
