@@ -608,11 +608,7 @@ export const useAdminStore = defineStore("admin", {
           member.user_log_info?.username?.toLowerCase().includes(query.toLowerCase())
         );
     
-        const matchesRole = !role || (
-          (role === 'staff' && member.user_log_info?.authorities?.authority === 'ROLE_STAFF' && member.staff_role === null) ||
-          (role === 'appraiser' && member.staff_role === 'APPRAISER') ||
-          (role === 'shipper' && member.staff_role === 'SHIPPER')
-        );
+        const matchesRole = !role || member.user_log_info?.authorities?.authority === role;
     
         const matchesStatus = !status || (
           (status === 'active' && member.user_log_info?.enabled === 1) ||

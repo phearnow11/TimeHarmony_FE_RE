@@ -146,8 +146,8 @@
       
       <!-- Quản trị người dùng -->
       <section v-if="currentSection === 'member-list'" class="mb-6">
-        <h2 class="text-3xl text-center font-semibold mb-5">Danh Sách Người Dùng</h2>
-      
+        <h3 class="text-3xl py-10 text-center">Danh sách người dùng</h3>
+
         <div class="mb-6">
           <h2 class="text-xl font-semibold mb-4">Tìm kiếm người dùng</h2>
           <div class="ui-input-container mb-4">
@@ -161,7 +161,7 @@
             />
           </div>
           <!-- Cột 1: Trạng thái -->
-            <div class="flex flex-col">
+            <div class="flex flex-col mb-5">
               <h3 class="font-semibold mb-2">Trạng thái</h3>
               <div class="flex flex-col gap-2">
                 <label class="container flex items-center gap-2">
@@ -181,7 +181,6 @@
               </div>
             </div>
           <!-- User -->
-          <h3 class="text-3xl py-10 text-center">Danh sách thành viên</h3>
           <div class="overflow-x-auto back p-4 rounded-lg shadow">
             <table class="table w-full">
               <thead class="bg-gray-200">
@@ -254,6 +253,8 @@
 
       <!-- Danh sách seller -->
       <section v-if="currentSection === 'seller-list'" class="mb-6">
+        <h3 class="text-3xl py-10 text-center">Danh sách người đăng bán</h3>
+
         <h2 class="text-xl font-semibold mb-4">Tìm kiếm người dùng</h2>
           <div class="ui-input-container mb-4">
             <input
@@ -266,7 +267,7 @@
             />
           </div>
           <!-- Cột 1: Trạng thái -->
-        <div class="flex flex-col">
+        <div class="flex flex-col mb-6">
           <h3 class="font-semibold mb-2">Trạng thái</h3>
           <div class="flex flex-col gap-2">
             <label class="container flex items-center gap-2">
@@ -285,7 +286,6 @@
             </label>
           </div>
         </div>
-        <h3 class="text-3xl py-10 text-center">Danh sách người đăng bán</h3>
           <div class="overflow-x-auto back p-4 rounded-lg shadow">
             <table class="table w-full">
               <thead class="bg-gray-200">
@@ -344,17 +344,18 @@
               </tbody>
             </table>
           </div>
-      </section>
-
-
-      <!-- Danh sách staff -->
-      <section v-if="currentSection === 'staff-list'" class="mb-6">
+        </section>
+        
+        
+        <!-- Danh sách staff -->
+        <section v-if="currentSection === 'staff-list'" class="mb-6">
+        <h3 class="text-3xl text-center py-10">Danh sách nhân viên</h3>
         <h2 class="text-xl font-semibold mb-4">Tìm kiếm người dùng</h2>
           <div class="ui-input-container mb-4">
             <input
-              required
-              placeholder="Tìm kiếm id, tên hoặc email.."
-              class="ui-input w-full px-4 py-2 border rounded-lg"
+            required
+            placeholder="Tìm kiếm id, tên hoặc email.."
+            class="ui-input w-full px-4 py-2 border rounded-lg"
               type="text"
               v-model="qStaff"
               @keyup="searchMembers"
@@ -383,7 +384,7 @@
   </div>
 
   <!-- Cột 2: Vai trò -->
-  <div class="flex flex-col">
+  <div class="flex flex-col mb-5">
     <h3 class="font-semibold mb-2">Vai trò</h3>
     <div class="flex flex-col gap-2">
       <label class="container flex items-center gap-2">
@@ -410,7 +411,6 @@
     </div>
   </div>
 </div>
-        <h3 class="text-3xl text-center py-10">Danh sách nhân viên</h3>
           <div class="overflow-x-auto back p-4 rounded-lg shadow">
             <table class="table w-full">
               <thead class="bg-gray-200">

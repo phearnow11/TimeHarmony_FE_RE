@@ -42,9 +42,7 @@
             </div>
           </div>
         </div>
-        <button @click="exportToExcel" class="th-p-btn hover:opacity-3 py-2 px-4">
-          Xuất Excel
-        </button>
+        
       </div>
     </div>
   </div>
@@ -193,32 +191,6 @@ const getChartColor = (index, alpha = 1) => {
   return alpha === 1 ? colors[index] : `${colors[index]}${Math.round(alpha * 255).toString(16)}`
 }
 
-
-const exportToExcel = () => {
-  const data = [
-    {
-      label: performanceItems.value[0].label,
-      value: formatValue(performanceItems.value[0].value, true),
-      isCurrency: true
-    },
-    {
-      label: performanceItems.value[1].label,
-      value: performanceItems.value[1].value,
-      isCurrency: false
-    },
-    {
-      label: performanceItems.value[2].label,
-      value: performanceItems.value[2].value,
-      isCurrency: false
-    }
-  ];
-
-  const worksheet = XLSX.utils.json_to_sheet(data, { header: ['label', 'value'] });
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Performance Data');
-
-  XLSX.writeFile(workbook, 'Data.xlsx');
-}
 
 onMounted(async () => {
   const sellerId = authStore.user_id;
