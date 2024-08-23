@@ -33,28 +33,28 @@ export const useChatStore = defineStore('chat', {
       axios.post(`${api}/chat/addtochat?user_id=${useAuthStore().user_id}&user_id2=${user_id}`);
     },
 
-    async findBanChat(username, sender_id) {
-      try {
-        console.log('Searching for messages with:', { sender_id, username });
-        const response = await supabase
-          .from('messages')
-          .select("*")
-          .eq('sender_id', sender_id)
-          .ilike('text', `%${username}%`);
+    // async findBanChat(username, sender_id) {
+    //   try {
+    //     console.log('Searching for messages with:', { sender_id, username });
+    //     const response = await supabase
+    //       .from('messages')
+    //       .select("*")
+    //       .eq('sender_id', sender_id)
+    //       .ilike('text', `%${username}%`);
     
-        console.log('Supabase response:', response);
+    //     console.log('Supabase response:', response);
     
-        if (response.data && response.data.length > 0) {
-          console.log('isBanned:', response.data);
-          return response.data;
-        } else {
-          console.log('No banned messages found');
-          return null;
-        }
-      } catch (error) {
-        console.log('Error finding chat', error);
-      }
-    },    
+    //     if (response.data && response.data.length > 0) {
+    //       console.log('isBanned:', response.data);
+    //       return response.data;
+    //     } else {
+    //       console.log('No banned messages found');
+    //       return null;
+    //     }
+    //   } catch (error) {
+    //     console.log('Error finding chat', error);
+    //   }
+    // },    
 
     async findVerifyMail() {
       try {
@@ -235,11 +235,11 @@ export const useChatStore = defineStore('chat', {
             setTimeout(() => {
               this.haveNewMessage = false
             }, 5000);
-            console.log(import.meta.env.VITE_ADMIN_USERID);
-            if(payload.new.sender_id==import.meta.env.VITE_ADMIN_USERID){
-              console.log("YOU HAVE BEEN BANNED!");
-              useAuthStore().logout()
-            }
+            // console.log(import.meta.env.VITE_ADMIN_USERID);
+            // if(payload.new.sender_id==import.meta.env.VITE_ADMIN_USERID){
+            //   console.log("YOU HAVE BEEN BANNED!");
+            //   useAuthStore().logout()
+            // }
             this.messages.push(payload.new);
           }
         )

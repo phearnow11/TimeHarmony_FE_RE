@@ -57,7 +57,7 @@
               <ul role="list" class="mt-4 space-y-4">
                 <li><router-link to="/documentation" class="text-[#9b9b9b] hover-underline-animation">Tài liệu</router-link></li>
                 <li><router-link to="/faq" class="text-[#9b9b9b] hover-underline-animation">Câu hỏi thường gặp</router-link></li>
-                <li><router-link to="/support" class="text-[#9b9b9b] hover-underline-animation">Hỗ trợ khách hàng</router-link></li>
+                <li><a href="mailto:timeharmony.ecom@gmail.com" class="text-[#9b9b9b] hover-underline-animation">Hỗ trợ khách hàng</a></li>
               </ul>
             </div>
             <div class="mt-12 md:mt-0">
