@@ -181,7 +181,7 @@ export const useStaffStore = defineStore("staff", {
       }
     },
     updateWatch(id, data) {
-      axios.patch(`${api}/staff/update/fields/${id}`, data)
+      return axios.patch(`${api}/staff/update/fields/${id}`, data)
         .then((res) => {
           console.log('Update successful:', res.data);
         })
@@ -191,6 +191,6 @@ export const useStaffStore = defineStore("staff", {
             console.log('Full error response:', err.response);
           }
         });
-    }  , 
+    }    
   },
 });

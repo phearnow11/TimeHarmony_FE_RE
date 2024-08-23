@@ -4,7 +4,7 @@
   <div class="h-screen">
     <div v-if="isLoading" class="overlay">
       <div class="loader-container">
-        <div class="loader">num
+        <div class="loader">
           <div class="loaderBar"></div>
         </div>
       </div>
@@ -594,7 +594,8 @@
                 </div>
               </td>
               <td class="p-2 border-b">{{ req[product.watch_id]?.appraiser_assigned ?? null }}</td>
-              <td class="p-2 border-b">{{ req[product.watch_id]?.appointment_date  ? formatDate(req[product.watch_id]?.appointment_date) : 'Chưa có ngày' }}</td>
+              <td v-if="req[product.watch_id]?.appraiser_assigned" class="p-2 border-b">{{ req[product.watch_id]?.appointment_date  ? formatDate(req[product.watch_id]?.appointment_date) : 'Chưa có ngày' }}</td>
+              <td v-else class="p-2 border-b">{{ req[product.watch_id]?.appointment_date  ? formatDateNoTime(req[product.watch_id]?.appointment_date) : 'Chưa có ngày' }}</td>
               <td class="p-2 border-b">{{ req[product.watch_id]?.status ?? null  }}</td>
               <td class="p-2 border-b">
                 <button @click="openAssignModal(product)" class="hover-underline-animation">
@@ -880,6 +881,7 @@
         <div class="flex w-full justify-start ">
           <VueDatePicker v-model="date" placeholder="Chọn ngày giao kiểm định" :format="formatDate"></VueDatePicker>
         </div>
+        <span v-if="!req[selectedWatch.watch_id].appraiser_assigned" >Khách chọn ngày kiểm định: {{ formatDateNoTime(req[selectedWatch.watch_id]?.appointment_date) }}</span>
           <p v-if="dateWarning" class="text-red-500 pt-2">{{ dateWarning }}</p>
         <br />
         <div class="modal-actions">
@@ -1986,6 +1988,10 @@ const currency = (value) => {
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleString('vi-VN')
+};
+const formatDateNoTime = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('vi-VN');
 };
 
 </script>

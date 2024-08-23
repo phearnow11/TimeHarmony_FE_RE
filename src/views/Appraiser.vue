@@ -810,7 +810,7 @@ const onDragEnd = (event) => {
 const handleConfirm = async (type) => {
   if (type === "approve") {
     console.log(`ready to update ${draggedItemId.value}`);
-    submit()
+    await submit()
     await staffStore.approveWatch(draggedItem.value.watch_id);
     showApproveModal.value = false;
   } else if (type === "unapprove") {
@@ -929,11 +929,14 @@ const submit = () => {
   };
 
   console.log(data);
-  
 
-  useStaffStore().updateWatch(draggedItem.value.watch_id, data);
-  clear()
+  // Return the promise to ensure completion before continuing
+  const result = useStaffStore().updateWatch(draggedItem.value.watch_id, data);
+  console.log('updateWatch result:', result); // Check if this logs a promise
+  return result
 };
+
+
 </script>
 
 <style scoped>
