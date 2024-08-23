@@ -244,6 +244,7 @@ router.beforeEach(async (to, from, next) => {
     await userStore.loadUser(user_id);
 
     var isVerify = await useMailStore().checkVerify(user_id)
+    
     if(isVerify){
       useUserStore().isVerify = true
       console.log(useUserStore().isVerify);

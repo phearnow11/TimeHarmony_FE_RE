@@ -131,10 +131,17 @@ const showPopup = ref(false);
 const route = useRoute();
 const verify = route.query.verify
 
-if(verify && useUserStore()?.isVerify == false){
+if (verify && useUserStore()?.isVerify == false) {
   useMailStore().findVerify(user.user_id, verify)
-  console.log(`waiting`);
-  message.value = 'Xác thực email thành công'
+    .then(() => {
+      console.log('waiting');
+      message.value = 'Xác thực email thành công';
+      window.location.replace('/setting/profile');
+    })
+    .catch((error) => {
+      console.error('Verification failed:', error);
+      // Handle any errors if needed
+    });
 }
 
 function generateVerificationCode(length = 6) {
@@ -238,6 +245,7 @@ const submit = () => {
   // Only include email and username if they've changed
   if (user.email !== originalUser.email) {
     updatedFields.email = user.email;
+    useMailStore().deleteVerify(user.user_id)
   }
   
   if (user.username !== originalUser.username) {
