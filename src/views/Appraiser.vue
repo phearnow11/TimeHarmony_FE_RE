@@ -684,27 +684,21 @@ watch(
 );
 
 const search = () => {
-  const searchTerm = id.value.toLowerCase().trim();
+  const query = id.value.toLowerCase().trim();
+
   columns.value.forEach((column) => {
-    if (searchTerm === "") {
-      // If search is empty, restore original tasks
-      if (column.name === "Chưa duyệt" && staffStore.unapprovedWatches)
-        column.tasks = staffStore.unapprovedWatches.map(mapWatchToTask);
-      if (column.name === "Đã được duyệt" && staffStore.approvedWatches)
-        column.tasks = staffStore.approvedWatches.map(mapWatchToTask);
-      if (column.name === "Không chấp thuận" && staffStore.deleteWatches)
-        column.tasks = staffStore.deleteWatches.map(mapWatchToTask);
-    } else {
-      // Filter tasks based on search term
-      column.tasks = column.tasks.filter(
-        (task) =>
-          task.watch_id.toString().toLowerCase().includes(searchTerm) ||
-          task.request_id.toString().toLowerCase().includes(searchTerm) ||
-          task.status.toLowerCase().includes(searchTerm)
+    column.tasks = column.tasks.map((task) => {
+      const matches = Object.values(task).some(
+        (value) =>
+          typeof value === 'string' &&
+          value.toLowerCase().includes(query)
       );
-    }
+      return { ...task, matches };
+    });
   });
 };
+
+
 
 // Helper function to map watch data to task object
 const mapWatchToTask = (watch) => ({
@@ -725,9 +719,7 @@ const filteredColumns = computed(() => {
 
   return columns.value.map((column) => ({
     ...column,
-    tasks: column.tasks.filter((task) =>
-      task.id.toString().toLowerCase().includes(id.value.toLowerCase())
-    ),
+    tasks: column.tasks.filter((task) => task.matches),
   }));
 });
 
