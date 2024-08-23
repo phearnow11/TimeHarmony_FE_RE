@@ -130,11 +130,30 @@
         </div>
         <div v-if="showCharts" class="gap-6 mb-6">
           <div>
-            <div class="date-filter mb-5">
-              <label class="mr-3" for="startDate">From:</label>
-                <input type="date" class="p-2 border bg-black-99 rounded" id="startDate" v-model="startDate" @change="updateChart">
-              <label class="mx-5" for="endDate">To:</label>
-                <input type="date" class="p-2 border bg-black-99 rounded" id="endDate" v-model="endDate" @change="updateChart">
+            <div class="flex items-center space-x-4 mb-4">
+              <div>
+                <label for="startDate" class="block text-sm font-medium ">Từ ngày:</label>
+                <input 
+                  type="date" 
+                  id="startDate" 
+                  v-model="startDate" 
+                  :max="endDate"
+                  @change="updateChart"
+                  class="p-2 border bg-black-99 rounded"
+                >
+              </div>
+              <div>
+                <label for="endDate" class="block text-sm font-medium ">Đến ngày:</label>
+                <input 
+                  type="date" 
+                  id="endDate" 
+                  v-model="endDate" 
+                  :min="startDate"
+                  :max="new Date().toISOString().split('T')[0]"
+                  @change="updateChart"
+                  class="p-2 border bg-black-99 rounded"
+                >
+              </div>
             </div>
             <div class="back p-4 rounded-lg shadow">
               <canvas ref="monthlyRevenueChart"></canvas>
@@ -1779,57 +1798,76 @@ const showCharts = ref(false);
 const monthlyRevenueChartInstance = ref(null);
 const monthlyRevenueChart = ref(null);
 
-
 // Add date filter refs
 const startDate = ref(new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0]); // Default to start of current year
 const endDate = ref(new Date().toISOString().split('T')[0]); // Default to today
+
+const validateDates = () => {
+  if (new Date(startDate.value) > new Date(endDate.value)) {
+    startDate.value = endDate.value;
+  }
+};
+
+watch([startDate, endDate], validateDates);
 
 const fetchAndProcessRevenueData = async (start, end) => {
   try {
     const response = await adminStore.getOrderRevenue(start, end);
     console.log("API Response:", JSON.stringify(response, null, 2));
     
-    if (!response) {
-      throw new Error("Response is undefined");
+    if (!response || typeof response !== 'object') {
+      throw new Error("Invalid response");
     }
 
-    if (typeof response !== 'object') {
-      throw new Error(`Unexpected response type: ${typeof response}`);
-    }
-
-    let rawData;
-    if (Array.isArray(response)) {
-      rawData = response;
-    } else if (response.data && Array.isArray(response.data)) {
-      rawData = response.data;
-    } else {
+    let rawData = Array.isArray(response) ? response : (response.data && Array.isArray(response.data) ? response.data : null);
+    if (!rawData) {
       throw new Error("Unable to find array data in response");
     }
 
-    const monthlyRevenue = new Array(12).fill(0);
+    const revenueData = {};
 
     rawData.forEach(item => {
       if (item && item.date && item.daily_revenue !== undefined) {
         const date = new Date(item.date);
-        const month = date.getMonth();
-        monthlyRevenue[month] += parseFloat(item.daily_revenue);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        revenueData[key] = (revenueData[key] || 0) + parseFloat(item.daily_revenue);
       } else {
         console.warn("Invalid item in rawData:", item);
       }
     });
 
-    return monthlyRevenue;
+    return revenueData;
   } catch (err) {
     console.error("Error fetching revenue data:", err);
     error.value = "Failed to fetch revenue data. Please try refreshing the page.";
-    return new Array(12).fill(0);
+    return {};
   }
+};
+
+const getChartLabels = (start, end) => {
+  const labels = [];
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  
+  // Ensure we include the entire last month
+  endDate.setMonth(endDate.getMonth() + 1);
+  endDate.setDate(0);
+
+  let currentDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+
+  while (currentDate <= endDate) {
+    labels.push(`T${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`);
+    currentDate.setMonth(currentDate.getMonth() + 1);
+  }
+
+  return labels;
 };
 
 const createMonthlyRevenueChart = async () => {
   try {
-    const monthlyRevenue = await fetchAndProcessRevenueData(startDate.value, endDate.value);
-    console.log("Processed monthly revenue:", monthlyRevenue);
+    validateDates();
+    const revenueData = await fetchAndProcessRevenueData(startDate.value, endDate.value);
+    console.log("Processed revenue data:", revenueData);
 
     if (monthlyRevenueChartInstance.value) monthlyRevenueChartInstance.value.destroy();
 
@@ -1838,14 +1876,21 @@ const createMonthlyRevenueChart = async () => {
       return;
     }
 
+    const labels = getChartLabels(startDate.value, endDate.value);
+    const data = labels.map(label => {
+      const [month, year] = label.substring(1).split('/');
+      const key = `${year}-${month.padStart(2, '0')}`;
+      return revenueData[key] || 0;
+    });
+
     const ctx = monthlyRevenueChart.value.getContext('2d');
     monthlyRevenueChartInstance.value = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+        labels: labels,
         datasets: [{
           label: 'Doanh Thu Hằng Tháng',
-          data: monthlyRevenue,
+          data: data,
           borderColor: 'rgb(255, 99, 132)',
           backgroundColor: 'rgba(255, 99, 132, 0.5)',
           tension: 0.1
@@ -1854,6 +1899,13 @@ const createMonthlyRevenueChart = async () => {
       options: {
         responsive: true,
         scales: {
+          x: {
+            ticks: {
+              callback: function(value, index) {
+                return labels[index];
+              }
+            }
+          },
           y: {
             beginAtZero: true,
             ticks: {
