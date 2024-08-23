@@ -596,16 +596,31 @@ export const useAdminStore = defineStore("admin", {
     getTopThree(state) {
       return state.topThreeWatch;
     },
-    filteredMembers: (state) => (query) => {
-      const lowerQuery = query.toLowerCase();
-      return state.members.filter(
-        (member) =>
-          member.member_id.toLowerCase().includes(lowerQuery) ||
-          member.first_name.toLowerCase().includes(lowerQuery) ||
-          member.last_name.toLowerCase().includes(lowerQuery) ||
-          member.email.toLowerCase().includes(lowerQuery) ||
-          member.user_log_info.username.toLowerCase().includes(lowerQuery)
-      );
+    filteredMembers: (state) => (query, role, status) => {
+      return state.members.filter(member => {
+        if (!member) return false;
+    
+        const matchesQuery = (
+          member.member_id?.toString().toLowerCase().includes(query.toLowerCase()) ||
+          member.first_name?.toLowerCase().includes(query.toLowerCase()) ||
+          member.last_name?.toLowerCase().includes(query.toLowerCase()) ||
+          member.email?.toLowerCase().includes(query.toLowerCase()) ||
+          member.user_log_info?.username?.toLowerCase().includes(query.toLowerCase())
+        );
+    
+        const matchesRole = !role || (
+          (role === 'staff' && member.user_log_info?.authorities?.authority === 'ROLE_STAFF' && member.staff_role === null) ||
+          (role === 'appraiser' && member.staff_role === 'APPRAISER') ||
+          (role === 'shipper' && member.staff_role === 'SHIPPER')
+        );
+    
+        const matchesStatus = !status || (
+          (status === 'active' && member.user_log_info?.enabled === 1) ||
+          (status === 'banned' && member.user_log_info?.enabled === 0)
+        );
+    
+        return matchesQuery && matchesRole && matchesStatus;
+      });
     },
 
     filteredWatches: (state) => (query) => {

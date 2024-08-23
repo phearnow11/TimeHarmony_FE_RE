@@ -643,12 +643,12 @@
             <tr v-for="order in filteredOrders" :key="order.order_id">
               <td class="p-2 border-b">{{ order.order_id }}</td>
               <td class="p-2 border-b">
-                {{ new Date(order.create_time).toLocaleDateString() }}
+                {{ formatDate(order.create_time) }}
               </td>
               <td class="p-2 border-b">{{ order.address }}</td>
               <td class="p-2 border-b">{{ order.receive_name }}</td>
               <td class="p-2 border-b">{{ order.phone }}</td>
-              <td class="p-2 border-b">{{ order.shipping_date ?? "Không có thông tin"}}</td>
+              <td class="p-2 border-b">{{ formatDate(order.shipping_date) ?? "Không có thông tin"}}</td>
               <td class="p-2 border-b">{{ stateOrders[order.state] }}</td>
               <td class="p-2 border-b">{{ order.notice || "Không có thông tin" }}</td>
               <td class="p-2 border-b">{{ currency(order.total_price) }}</td>
@@ -677,12 +677,12 @@
             <tr v-for="order in filteredSuccessOrders" :key="order.order_id">
               <td class="p-2 border-b">{{ order.order_id }}</td>
               <td class="p-2 border-b">
-                {{ new Date(order.create_time).toLocaleDateString() }}
+                {{ formatDate(order.create_time) }}
               </td>
               <td class="p-2 border-b">{{ order.address }}</td>
               <td class="p-2 border-b">{{ order.receive_name }}</td>
               <td class="p-2 border-b">{{ order.phone }}</td>
-              <td class="p-2 border-b">{{ order.shipping_date ?? "Không có thông tin"}}</td>
+              <td class="p-2 border-b">{{ formatDate(order.shipping_date) ?? "Không có thông tin"}}</td>
               <td class="p-2 border-b">{{ stateOrders[order.state] }}</td>
               <td class="p-2 border-b">{{ order.notice || "Không có thông tin" }}</td>
               <td class="p-2 border-b">{{ currency(order.total_price) }}</td>
@@ -711,12 +711,12 @@
             <tr v-for="order in filteredFailOrders" :key="order.order_id">
               <td class="p-2 border-b">{{ order.order_id }}</td>
               <td class="p-2 border-b">
-                {{ new Date(order.create_time).toLocaleDateString() }}
+                {{ formatDate(order.create_time) }}
               </td>
               <td class="p-2 border-b">{{ order.address }}</td>
               <td class="p-2 border-b">{{ order.receive_name }}</td>
               <td class="p-2 border-b">{{ order.phone }}</td>
-              <td class="p-2 border-b">{{ order.shipping_date ?? "Không có thông tin"}}</td>
+              <td class="p-2 border-b">{{ formatDate(order.shipping_date) ?? "Không có thông tin"}}</td>
               <td class="p-2 border-b">{{ stateOrders[order.state] }}</td>
               <td class="p-2 border-b">{{ order.notice || "Không có thông tin" }}</td>
               <td class="p-2 border-b">{{ currency(order.total_price) }}</td>
@@ -763,7 +763,7 @@
                   </td>
                   <td class="p-2 text-center justify-between">
                     <button @click="openAssign(member)" class="hover-underline-animation">Giao đơn</button>
-                    <button @click="openDetail(member)" class="hover-underline-animation">Xem chi tiết</button>
+                    <!-- <button @click="openDetail(member)" class="hover-underline-animation">Xem chi tiết</button> -->
                   </td>
                   <td class="p-2 text-center">
                     <button class="hover-underline-animation" @click="mess(member.member_id)">Nhắn tin</button>
@@ -1414,75 +1414,15 @@ watch(
 
 // Define computed properties with error handling
 const filteredMembers = computed(() => {
-  
-  let filter = adminStore.filteredMembers(qMembers.value).filter(member => {
-    return member.user_log_info.authorities.authority === 'ROLE_USER';
-  });  
-  if (selectedStatus.value) {
-    filter = filter.filter(member => {
-      switch (selectedStatus.value) {
-        case 'active':
-          return member.user_log_info.enabled === 1;
-        case 'banned':
-          return member.user_log_info.enabled === 0;
-        default:
-          return true;
-      }
-    });
-  }
-  
-  console.log("Final filtered data:", filter);
-  return filter;
+  return adminStore.filteredMembers(qMembers.value, 'ROLE_USER', selectedStatus.value);
 });
 
 const filteredSeller = computed(() => {
-  
-  let filter = adminStore.filteredMembers(qMembers.value).filter(member => {
-    return member.user_log_info.authorities.authority === 'ROLE_SELLER';
-  });  
-  if (selectedStatus.value) {
-    filter = filter.filter(member => {
-      switch (selectedStatus.value) {
-        case 'active':
-          return member.user_log_info.enabled === 1;
-        case 'banned':
-          return member.user_log_info.enabled === 0;
-        default:
-          return true;
-      }
-    });
-  }
-  
-  console.log("Final filtered data:", filter);
-  return filter;
+  return adminStore.filteredMembers(qMembers.value, 'ROLE_SELLER', selectedStatus.value);
 });
+
 const filteredStaff = computed(() => {
-  try {
-    let filter = adminStore.filteredMembers(qStaff.value).filter(member => 
-      member.user_log_info.authorities.authority === 'ROLE_STAFF'
-    );
-
-    if (selectedRole.value) {
-      filter = filter.filter(member => {
-        switch (selectedRole.value) {
-          case 'staff':
-            return member.staff_role === null;
-          case 'appraiser':
-            return member.staff_role === 'APPRAISER';
-          case 'shipper':
-            return member.staff_role === 'SHIPPER';
-          default:
-            return true;
-        }
-      });
-    }
-
-    return filter;
-  } catch (err) {
-    console.error("Error in filteredMembers:", err);
-    error.value = "Error filtering members. Please try again.";
-    return [];
-  }
+  return adminStore.filteredMembers(qStaff.value, selectedRole.value, selectedStatus.value);
 });
 
 const filteredShipper = computed(() => {
