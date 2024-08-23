@@ -268,10 +268,10 @@
               <strong>Vành đồng hồ:</strong>
               {{ watchStore.watch_data.bezel || "Không có thông tin" }}
             </li>
-            <li>
+            <!-- <li>
               <strong>Chất liệu vành:</strong>
               {{ watchStore.watch_data.bezelmaterial || "Không có thông tin" }}
-            </li>
+            </li> -->
             <li>
               <strong>Nắp lưng:</strong>
               {{ watchStore.watch_data.caseback || "Không có thông tin" }}
