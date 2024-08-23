@@ -83,7 +83,7 @@ export const useAuthStore = defineStore('auth', {
             Cookies.remove('token');
             Cookies.remove('user_id');
             useUserStore().updateCartCount(0);
-            router.push('/');
+            window.location.replace('/');
         },
         
         async resetPass(oldpass, username, newpass) {
