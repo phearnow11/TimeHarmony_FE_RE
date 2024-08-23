@@ -87,7 +87,7 @@
         </div>
       </div>
 
-      <div class="form__group field flex flex-col w-96 justify-start">
+      <!-- <div class="form__group field flex flex-col w-96 justify-start">
         <div class="mydict">
           <div class="form">
             <label class="mb-3 text-[#9b9b9b]">Hình thức kiểm định</label>
@@ -115,8 +115,9 @@
             </div>
           </div>
         </div>
-      </div>
-      <div class="form__group field flex w-96 justify-start">
+      </div> -->
+      <div class="form__group field flex w-96 justify-start items-center">
+        <span>Hình thức kiểm định offline. (Phí 500.000 VND thanh toán sau khi kiểm định xong)</span>
         <VueDatePicker
           v-model="date"
           placeholder="Chọn ngày muốn kiểm định"

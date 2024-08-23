@@ -1207,7 +1207,7 @@ const assignWatch = () => {
       seller = result;
       console.log("GG",seller);
 
-      const timestamp = date.value.getTime();
+      const timestamp = date.value.getTime() - 7 * 60 * 60 * 1000;
       console.log(formatTimestamp(timestamp));
       
       // Check if the appraiser has already been assigned
@@ -1219,16 +1219,17 @@ const assignWatch = () => {
         );
         
         showAssignModal.value = !showAssignModal.value;
-        useMailStore().send(//Kiem dinh vien
-          selectedAppraiser.value.email,
-          'Thông báo kiểm định',
-          `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDay()}/${date.value.getMonth()}/${date.value.getFullYear()}.`
-        );
-        useMailStore().send(//Seller
-        seller.email,
-        'Thông báo kiểm định',
-        `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDay()}/${date.value.getMonth()}/${date.value.getFullYear()}.`
-      );
+        useMailStore().send(
+  selectedAppraiser.value.email,
+  'Thông báo kiểm định',
+  `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDate()}/${date.value.getMonth() + 1}/${date.value.getFullYear()}.`
+);
+useMailStore().send(
+  seller.email,
+  'Thông báo kiểm định',
+  `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDate()}/${date.value.getMonth() + 1}/${date.value.getFullYear()}.`
+);
+
         return;
       }
       
@@ -1240,16 +1241,17 @@ const assignWatch = () => {
       );
       
       showAssignModal.value = !showAssignModal.value;
-      useMailStore().send(//Kiem dinh vien
-        selectedAppraiser.value.email,
-        'Thông báo kiểm định',
-        `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDay()}/${date.value.getMonth()}/${date.value.getFullYear()}.`
-      );
-      useMailStore().send(//Seller
-        seller.email,
-        'Thông báo kiểm định',
-        `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDay()}/${date.value.getMonth()}/${date.value.getFullYear()}.`
-      );
+      useMailStore().send(
+  selectedAppraiser.value.email,
+  'Thông báo kiểm định',
+  `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDate()}/${date.value.getMonth() + 1}/${date.value.getFullYear()}.`
+);
+useMailStore().send(
+  seller.email,
+  'Thông báo kiểm định',
+  `Bạn vui lòng có mặt lúc ${date.value.getHours()}:${date.value.getMinutes()} ngày ${date.value.getDate()}/${date.value.getMonth() + 1}/${date.value.getFullYear()}.`
+);
+
     })
     .catch(error => {
       console.error("Error fetching user info:", error);
