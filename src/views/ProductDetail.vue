@@ -16,11 +16,12 @@
         class="relative z-10 max-w-3xl max-h-[90vh] overflow-hidden"
         @click.stop
       >
-        <img
-          :src="currentModalImage"
-          :alt="watchStore.watch_data.name"
-          class="max-w-full max-h-full object-contain"
-        />
+      <img
+        :src="currentImage"
+        :alt="watchStore.watch_data.watch_name"
+        class="w-full h-full object-contain main-image"
+      />
+
 
         <!-- Navigation arrows -->
         <button
@@ -41,7 +42,7 @@
           class="bg-drop absolute bottom-4 left-1/2 transform -translate-x-1/2 text-primary px-2 py-1"
         >
           {{ currentImageIndex + 1 }} /
-          {{ watchStore.watch_data.images.length }}
+          {{ watchStore.watch_data.image_url.length }}
         </div>
       </div>
     </div>
@@ -56,14 +57,14 @@
         >
           <img
             :src="currentImage"
-            :alt="watchStore.watch_data.name"
+            :alt="watchStore.watch_data.watch_name"
             class="w-full h-full object-contain main-image"
           />
         </div>
         <!-- Thumbnails -->
         <div class="flex gap-2 overflow-x-auto mt-2">
           <img
-            v-for="(imageUrl, index) in watchStore.watch_data.images"
+            v-for="(imageUrl, index) in watchStore.watch_data.image_url"
             :key="index"
             :src="imageUrl"
             :alt="`Product Image ${index + 1}`"
@@ -78,15 +79,15 @@
       <div class="w-full md:w-1/2">
         <div class="justify-between flex items-center">
           <h1 class="text-xl font-semibold mb-2">
-            {{ watchStore.watch_data.name }}
+            {{ watchStore.watch_data.watch_name }}
           </h1>
           <i
-            :class="[
-              'fa-sharp cursor-pointer',
-              isBookmarked ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark',
-              'bookmark-icon',
-              { active: isBookmarked },
-            ]"
+          :class="[
+            'fa-sharp cursor-pointer',
+            isBookmarked ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark',
+            'bookmark-icon',
+            { active: isBookmarked },
+          ]"
             @click="toggleBookmark"
             :style="{
               pointerEvents: isWatchAvailable ? 'auto' : 'none',
@@ -94,6 +95,10 @@
             }"
           ></i>
         </div>
+        <li>
+          <strong>Được đánh giá bởi:</strong>
+          {{ appraiserName }}
+        </li>
         <div class="mb-4">
           <span class="text-xl font-thin text-secondary">
             {{ formatPriceVND(watchStore.watch_data.price) }}</span
@@ -167,162 +172,166 @@
     </div>
 
     <div class="p-8 border-t border-secondary mt-6 max-w-4xl mx-auto">
-      <section class="mb-8">
-        <h1 class="text-2xl font-bold border-b border-secondary w-48 mb-4">
-          Mô tả sản phẩm
-        </h1>
-        <div class="mb-5">
-          <span>
-            {{ watchStore.watch_data.description || "Không có thông tin" }}
-          </span>
-        </div>
-      </section>
+    <section class="mb-8">
+      <h1 class="text-2xl font-bold border-b border-secondary w-48 mb-4">
+        Mô tả sản phẩm
+      </h1>
+      <div class="mb-5">
+        <span>
+          {{ watchStore.watch_data.watch_description || "Không có thông tin" }}
+        </span>
+      </div>
+    </section>
 
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div>
-          <h2 class="text-xl font-bold border-b border-secondary w-40 mb-4">
-            Chức năng
-          </h2>
-          <ul class="space-y-2">
-            <li>
-              <strong>Lịch:</strong>
-              {{ watchStore.watch_data.calender || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Tính năng:</strong>
-              {{ watchStore.watch_data.feature || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Bộ máy:</strong>
-              {{ watchStore.watch_data.movement || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Chức năng:</strong>
-              {{ watchStore.watch_data.function || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Động cơ:</strong>
-              {{ watchStore.watch_data.engine || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Chống nước:</strong>
-              {{ watchStore.watch_data.waterresistant || "Không có thông tin" }}
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h2 class="text-xl border-b border-secondary font-bold w-40 mb-4">
-            Mặt số
-          </h2>
-          <ul class="space-y-2">
-            <li>
-              <strong>Loại mặt số:</strong>
-              {{ watchStore.watch_data.dialtype || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Màu mặt số:</strong>
-              {{ watchStore.watch_data.dialcolor || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Mặt kính:</strong>
-              {{ watchStore.watch_data.crystal || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Vạch chỉ giây:</strong>
-              {{ watchStore.watch_data.secondmaker || "Không có thông tin" }}
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h2 class="text-xl border-b border-secondary font-bold w-40 mb-4">
-            Dây đeo
-          </h2>
-          <ul class="space-y-2">
-            <li>
-              <strong>Màu dây đeo:</strong>
-              {{ watchStore.watch_data.bandcolor || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Loại dây đeo:</strong>
-              {{ watchStore.watch_data.bandtype || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Khóa:</strong>
-              {{ watchStore.watch_data.clasp || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Dây đeo kim loại:</strong>
-              {{ watchStore.watch_data.bracelet || "Không có thông tin" }}
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h2 class="text-xl border-b border-secondary w-40 font-bold mb-4">
-            Vỏ đồng hồ
-          </h2>
-          <ul class="space-y-2">
-            <li>
-              <strong>Vành đồng hồ:</strong>
-              {{ watchStore.watch_data.bezel || "Không có thông tin" }}
-            </li>
-            <!-- <li>
-              <strong>Chất liệu vành:</strong>
-              {{ watchStore.watch_data.bezelmaterial || "Không có thông tin" }}
-            </li> -->
-            <li>
-              <strong>Nắp lưng:</strong>
-              {{ watchStore.watch_data.caseback || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Kích thước vỏ:</strong>
-              {{ watchStore.watch_data.casedimension || "Không có thông tin" }}
-            </li>
-            <li>
-              <strong>Hình dạng vỏ:</strong>
-              {{ watchStore.watch_data.caseshape || "Không có thông tin" }}
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <section class="mt-8">
-        <h2 class="text-xl border-b border-secondary w-40 font-bold mb-4">
-          Thông tin thêm
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div>
+        <h2 class="text-xl font-bold border-b border-secondary w-40 mb-4">
+          Chức năng
         </h2>
         <ul class="space-y-2">
           <li>
-            <strong>Thương hiệu:</strong>
-            {{ watchStore.watch_data.brand || "Không có thông tin" }}
+            <strong>Lịch:</strong>
+            {{ watchStore.watch_data.calender || "Không có thông tin" }}
           </li>
           <li>
-            <strong>Dòng sản phẩm:</strong>
-            {{ watchStore.watch_data.series || "Không có thông tin" }}
+            <strong>Tính năng:</strong>
+            {{ watchStore.watch_data.feature || "Không có thông tin" }}
           </li>
           <li>
-            <strong>Mẫu:</strong>
-            {{ watchStore.watch_data.model || "Không có thông tin" }}
+            <strong>Bộ máy:</strong>
+            {{ watchStore.watch_data.movement || "Không có thông tin" }}
           </li>
           <li>
-            <strong>Giới tính:</strong>
-            {{ translate() || "Không có thông tin" }}
+            <strong>Chức năng:</strong>
+            {{ watchStore.watch_data.functions || "Không có thông tin" }}
           </li>
           <li>
-            <strong>Loại phong cách:</strong>
-            {{ watchStore.watch_data.style || "Không có thông tin" }}
+            <strong>Động cơ:</strong>
+            {{ watchStore.watch_data.engine || "Không có thông tin" }}
           </li>
           <li>
-            <strong>Phân lớp:</strong>
-            {{ watchStore.watch_data.subclass || "Không có thông tin" }}
-          </li>
-          <li>
-            <strong>Nhãn sản xuất:</strong>
-            {{ watchStore.watch_data.madelabel || "Không có thông tin" }}
+            <strong>Chống nước:</strong>
+            {{ watchStore.watch_data.water_resistant || "Không có thông tin" }}
           </li>
         </ul>
-      </section>
+      </div>
+
+      <div>
+        <h2 class="text-xl border-b border-secondary font-bold w-40 mb-4">
+          Mặt số
+        </h2>
+        <ul class="space-y-2">
+          <li>
+            <strong>Loại mặt số:</strong>
+            {{ watchStore.watch_data.dial_type || "Không có thông tin" }}
+          </li>
+          <li>
+            <strong>Màu mặt số:</strong>
+            {{ watchStore.watch_data.dial_color || "Không có thông tin" }}
+          </li>
+          <li>
+            <strong>Mặt kính:</strong>
+            {{ watchStore.watch_data.crystal || "Không có thông tin" }}
+          </li>
+          <li>
+            <strong>Vạch chỉ giây:</strong>
+            {{ watchStore.watch_data.second_makers || "Không có thông tin" }}
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-xl border-b border-secondary font-bold w-40 mb-4">
+          Dây đeo
+        </h2>
+        <ul class="space-y-2">
+          <li>
+            <strong>Màu dây đeo:</strong>
+            {{ watchStore.watch_data.band_color || "Không có thông tin" }}
+          </li>
+          <li>
+            <strong>Loại dây đeo:</strong>
+            {{ watchStore.watch_data.band_type || "Không có thông tin" }}
+          </li>
+          <li>
+            <strong>Khóa:</strong>
+            {{ watchStore.watch_data.clasp || "Không có thông tin" }}
+          </li>
+          <li>
+            <strong>Dây đeo kim loại:</strong>
+            {{ watchStore.watch_data.bracelet || "Không có thông tin" }}
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-xl border-b border-secondary w-40 font-bold mb-4">
+          Vỏ đồng hồ
+        </h2>
+        <ul class="space-y-2">
+          <li>
+            <strong>Vành đồng hồ:</strong>
+            {{ watchStore.watch_data.bezel || "Không có thông tin" }}
+          </li>
+          <li>
+            <strong>Nắp lưng:</strong>
+            {{ watchStore.watch_data.case_back || "Không có thông tin" }}
+          </li>
+          <li>
+            <strong>Kích thước vỏ:</strong>
+            {{ watchStore.watch_data.case_dimension || "Không có thông tin" }}
+          </li>
+          <li>
+            <strong>Hình dạng vỏ:</strong>
+            {{ watchStore.watch_data.case_shape || "Không có thông tin" }}
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-xl border-b border-secondary w-40 font-bold mb-4">
+        Thông tin thêm
+      </h2>
+      <ul class="space-y-2">
+        <li>
+          <strong>Thương hiệu:</strong>
+          {{ watchStore.watch_data.brand || "Không có thông tin" }}
+        </li>
+        <li>
+          <strong>Dòng sản phẩm:</strong>
+          {{ watchStore.watch_data.series || "Không có thông tin" }}
+        </li>
+        <li>
+          <strong>Mẫu:</strong>
+          {{ watchStore.watch_data.model || "Không có thông tin" }}
+        </li>
+        <li>
+          <strong>Giới tính:</strong>
+          {{ watchStore.watch_data.gender || "Không có thông tin" }}
+        </li>
+        <li>
+          <strong>Loại phong cách:</strong>
+          {{ watchStore.watch_data.style_type || "Không có thông tin" }}
+        </li>
+        <li>
+          <strong>Phân lớp:</strong>
+          {{ watchStore.watch_data.sub_class || "Không có thông tin" }}
+        </li>
+        <li>
+          <strong>Nhãn sản xuất:</strong>
+          {{ watchStore.watch_data.made_label || "Không có thông tin" }}
+        </li>
+        <li>
+          <strong>Ngày tạo:</strong>
+          {{ formatDate(watchStore.watch_data.watch_create_date) }}
+        </li>
+        <li>
+          <strong>Ngày phê duyệt:</strong>
+          {{ formatDate(watchStore.watch_data.watch_approval_date) }}
+        </li>
+      </ul>
+    </section>
 
       <section class="mt-10">
         <h2 class="text-xl border-b border-secondary font-bold w-56 mb-4">
@@ -435,8 +444,24 @@ const isLoadingCart = ref(false);
 const currentProduct = ref({});
 const popupMessage = ref("");
 const showProductDetails = ref(true);
-
+const appraiserName = ref('');
 const activeSection = ref(""); // Biến điều khiển phần nội dung hiển thị
+
+
+const loadAppraiserName = async () => {
+  if (watchStore.watch_data.appraised_by) {
+    try {
+      const appraiser = await userStore.getUserInfo(watchStore.watch_data.appraised_by);
+      appraiserName.value = `${appraiser.first_name} ${appraiser.last_name}`;
+    } catch (error) {
+      console.error("Error loading appraiser info:", error);
+      appraiserName.value = "Unknown";
+    }
+  } else {
+    appraiserName.value = "Not appraised yet";
+  }
+};
+
 
 const toggleSection = (section) => {
   activeSection.value = activeSection.value === section ? "" : section;
@@ -575,7 +600,9 @@ onMounted(async () => {
   await updateBookmarkStatus();
   await watchStore.getDetailWatch(watchId);
   console.log("This is state: " + watchStore.watch_data.state);
+  console.log(watchStore.watch_data.image_url[0]);
   updateCurrentImage();
+  await loadAppraiserName();
   if (watchStore.watch_data.seller && watchStore.watch_data.seller.member_id) {
     retailer.value = await userStore.getUserInfo(
       watchStore.watch_data.seller.member_id
@@ -584,22 +611,25 @@ onMounted(async () => {
 });
 
 watch(() => watchStore.watch_data.images, updateCurrentImage);
+watch(() => watchStore.watch_data, async () => {
+  await loadAppraiserName();
+}, { deep: true });
+
 
 function updateCurrentImage() {
-  if (watchStore.watch_data.images && watchStore.watch_data.images.length > 0) {
-    currentImage.value = watchStore.watch_data.images[0];
+  if (watchStore.watch_data.image_url && watchStore.watch_data.image_url.length > 0) {
+    currentImage.value = watchStore.watch_data.image_url[0];
   }
 }
 
 // Existing modal functions
 const currentImageIndex = ref(0);
 const currentModalImage = computed(
-  () => watchStore.watch_data.images[currentImageIndex.value]
+  () => watchStore.watch_data.image_url[currentImageIndex.value]
 );
-
 function openModal() {
   isModalOpen.value = true;
-  currentImageIndex.value = watchStore.watch_data.images.indexOf(
+  currentImageIndex.value = watchStore.watch_data.image_url.indexOf(
     currentImage.value
   );
 }
@@ -610,14 +640,29 @@ function closeModal() {
 
 function nextImage() {
   currentImageIndex.value =
-    (currentImageIndex.value + 1) % watchStore.watch_data.images.length;
+    (currentImageIndex.value + 1) % watchStore.watch_data.image_url.length;
 }
 
 function prevImage() {
   currentImageIndex.value =
-    (currentImageIndex.value - 1 + watchStore.watch_data.images.length) %
-    watchStore.watch_data.images.length;
+    (currentImageIndex.value - 1 + watchStore.watch_data.image_url.length) %
+    watchStore.watch_data.image_url.length;
 }
+
+const formatDate = (dateString) => {
+  if (!dateString) return "Không có thông tin";
+  
+  const date = new Date(dateString);
+  
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+};
 </script>
 
 

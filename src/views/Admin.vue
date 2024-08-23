@@ -128,18 +128,16 @@
         <div class="w-full flex justify-center p-5">
           <h2 class="text-2xl font-semibold mb-4">Tổng Quan Lợi Nhuận</h2>
         </div>
-        <div v-if="showCharts" class="grid  grid-cols-2 gap-6 mb-6">
+        <div v-if="showCharts" class="gap-6 mb-6">
           <div>
             <div class="date-filter mb-5">
               <label class="mr-3" for="startDate">From:</label>
-              <input type="date" class="p-2 border bg-black-99 rounded" id="startDate" v-model="startDate" @change="updateChart">
-              
+                <input type="date" class="p-2 border bg-black-99 rounded" id="startDate" v-model="startDate" @change="updateChart">
               <label class="mx-5" for="endDate">To:</label>
-              <input type="date" class="p-2 border bg-black-99 rounded" id="endDate" v-model="endDate" @change="updateChart">
+                <input type="date" class="p-2 border bg-black-99 rounded" id="endDate" v-model="endDate" @change="updateChart">
             </div>
             <div class="back p-4 rounded-lg shadow">
-
-              <canvas ref="revenueChart"></canvas>
+              <canvas ref="monthlyRevenueChart"></canvas>
             </div>
           </div>
         </div>
@@ -1838,8 +1836,8 @@ const updateOrderStats = async () => {
 //Chart Showing
 const currentSection = ref('profit-overview');
 const showCharts = ref(false);
-const revenueChartInstance = ref(null);
-const revenueChart = ref(null);
+const monthlyRevenueChartInstance = ref(null);
+const monthlyRevenueChart = ref(null);
 
 
 // Add date filter refs
@@ -1893,15 +1891,15 @@ const createMonthlyRevenueChart = async () => {
     const monthlyRevenue = await fetchAndProcessRevenueData(startDate.value, endDate.value);
     console.log("Processed monthly revenue:", monthlyRevenue);
 
-    if (revenueChartInstance.value) revenueChartInstance.value.destroy();
+    if (monthlyRevenueChartInstance.value) monthlyRevenueChartInstance.value.destroy();
 
-    if (!revenueChart.value) {
+    if (!monthlyRevenueChart.value) {
       console.error("Canvas element not found");
       return;
     }
 
-    const ctx = revenueChart.value.getContext('2d');
-    revenueChartInstance.value = new Chart(ctx, {
+    const ctx = monthlyRevenueChart.value.getContext('2d');
+    monthlyRevenueChartInstance.value = new Chart(ctx, {
       type: 'line',
       data: {
         labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
@@ -1985,10 +1983,12 @@ const currency = (value) => {
   }
   return `${Number(value).toLocaleString("vi-VN")} ₫`;
 };
+
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleString('vi-VN')
 };
+
 const formatDateNoTime = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('vi-VN');

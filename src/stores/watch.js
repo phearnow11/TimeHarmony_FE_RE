@@ -13,37 +13,40 @@ export const useWatchStore = defineStore("watch", {
     filters: [],
     searchResults: [],
     watch_data: {
-      name: "",
-      price: "",
-      images: [],
-      description: "",
+      watch_id: null,
+      seller: null,
+      watch_name: "",
+      watch_description: "",
+      image_url: [],
       state: 0,
+      price: null,
       brand: "",
       series: "",
       model: "",
       gender: "",
-      style: "",
-      subclass: "",
-      madelabel: "",
+      style_type: "",
+      sub_class: "",
+      made_label: "",
       calender: "",
       feature: "",
       movement: "",
-      function: "",
+      functions: "",
       engine: "",
-      waterresistant: "",
-      bandcolor: "",
-      bandtype: "",
+      water_resistant: "",
+      band_color: "",
+      band_type: "",
       clasp: "",
       bracelet: "",
-      dialtype: "",
-      dialcolor: "",
+      dial_type: "",
+      dial_color: "",
       crystal: "",
-      secondmaker: "",
+      second_makers: "",
       bezel: "",
-      bezelmaterial: "",
-      caseback: "",
-      casedimension: "",
-      caseshape: ""
+      bezel_material: "",
+      case_back: "",
+      case_dimension: "",
+      case_shape: "",
+      appraised_by: null
     }
   }),
 
@@ -123,47 +126,62 @@ export const useWatchStore = defineStore("watch", {
         const response = await axios.get(`${api}/watch/get/${watch_id}`);
         const res = response.data;
         console.log(res);
-        this.watch_data = {
-          seller: res.seller || null,
-          name: res.watch_name || null,
-          description: res.watch_description || null,
-          images: res.image_url ? (Array.isArray(res.image_url) ? res.image_url : [res.image_url]) : [],
-          state: res.state !== undefined ? res.state : null,
-          price: res.price || null,
-          brand: res.brand || null,
-          series: res.series || null,
-          model: res.model || null,
-          gender: res.gender || null,
-          style: res.style_type || null,
-          subclass: res.sub_class || null,
-          madelabel: res.made_label || null,
-          calender: res.calender || null,
-          feature: res.feature || null,
-          movement: res.movement || null,
-          function: res.functions || null,
-          engine: res.engine || null,
-          waterresistant: res.water_resistant || null,
-          bandcolor: res.band_color || null,
-          bandtype: res.band_type || null,
-          clasp: res.clasp || null,
-          bracelet: res.bracelet || null,
-          dialtype: res.dial_type || null,
-          dialcolor: res.dial_color || null,
-          crystal: res.crystal || null,
-          secondmaker: res.second_makers || null,
-          bezel: res.bezel || null,
-          bezelmaterial: res.bezel_material || null,
-          caseback: res.case_back || null,
-          casedimension: res.case_dimension || null,
-          caseshape: res.case_shape || null,
-        };
+        
+        if (res.watch) {
+          console.log("API image_url:", res.watch.image_url);
 
+          this.watch_data = {
+            watch_id: res.watch.watch_id,
+            seller: res.watch.seller,
+            watch_name: res.watch.watch_name,
+            watch_description: res.watch.watch_description,
+            image_url: res.watch.image_url ? (Array.isArray(res.watch.image_url) ? res.watch.image_url : [res.watch.image_url]) : [],
+            watch_create_date: res.watch.watch_create_date,
+            watch_approval_date: res.watch.watch_approval_date,
+            state: res.watch.state,
+            price: res.watch.price,
+            brand: res.watch.brand,
+            series: res.watch.series,
+            model: res.watch.model,
+            gender: res.watch.gender,
+            style_type: res.watch.style_type,
+            sub_class: res.watch.sub_class,
+            made_label: res.watch.made_label,
+            calender: res.watch.calender,
+            feature: res.watch.feature,
+            movement: res.watch.movement,
+            functions: res.watch.functions,
+            engine: res.watch.engine,
+            water_resistant: res.watch.water_resistant,
+            band_color: res.watch.band_color,
+            band_type: res.watch.band_type,
+            clasp: res.watch.clasp,
+            bracelet: res.watch.bracelet,
+            dial_type: res.watch.dial_type,
+            dial_color: res.watch.dial_color,
+            crystal: res.watch.crystal,
+            second_makers: res.watch.second_makers,
+            bezel: res.watch.bezel,
+            bezel_material: res.watch.bezel_material,
+            case_back: res.watch.case_back,
+            case_dimension: res.watch.case_dimension,
+            case_shape: res.watch.case_shape,
+            appraised_by: res.appraised_by
+          };
+          console.log("Image URL:", this.watch_data.image_url);
+
+        } else {
+          console.error("Watch data not found in the response");
+          this.error = "Watch data not found";
+        }
+    
         return this.watch_data;
       } catch (error) {
         console.error("Error fetching watch data:", error);
+        this.error = error.message || "Failed to fetch watch data";
         throw error;
       }
-    }, 
+    },
     async searchWatches(keyword) {
       try {
         const response = await axios.get(`${api}/watch/search/keyword?keyword=${keyword}`);
