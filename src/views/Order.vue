@@ -452,7 +452,7 @@ const createOrder = async () => {
     address: shippingAddress.value ? shippingAddress.value.id : null,
     notice: note.value,
     total_price: totalAll.value,
-    payment_method: selectedOption.value === 'cod' ? 'COD' : 'Card',
+    payment_method: selectedOption.value === 'cod' ? 'COD' : 'ATM',
     transaction_no: selectedOption.value === 'cod' ? "" : "Chờ xử lý",
   };
 
@@ -536,7 +536,7 @@ const handleVNPayReturn = async () => {
         address: shippingAddress.value ? shippingAddress.value.id : null,
         notice: note.value,
         total_price: totalPrice.value,
-        payment_method: "Card",
+        payment_method: "ATM",
         transaction_no: vnpayTransactionNo,
       });
       if (result) {
