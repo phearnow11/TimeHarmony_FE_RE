@@ -70,6 +70,8 @@ const paginatedWatches = computed(() => {
 onMounted(async () => {
   if(useUserStore().role ==='ROLE_ADMIN') return router.push('/admin')
   if(useUserStore().staff_role === 'APPRAISER') return router.push('/appraiser')
+  if(useUserStore().staff_role === 'SHIPPER') return router.push('/forshipper')
+
     try {
       console.log(api)
       const response = await axios.get(`${api}/watch/get/30-watches`);
