@@ -97,11 +97,12 @@
 
 <script setup>
 import ProductCard from '../components/ProductCard.vue';
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, provide } from 'vue';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '../stores/user';
 import { useChatStore } from '../stores/chat';
 import axios from 'axios';
+import router from '../router';
  
 var api = import.meta.env.VITE_API_PORT
 const route = useRoute();
@@ -160,7 +161,8 @@ onMounted(async () => {
 const mess = () => {
   useChatStore().addToChat(retailer.value.user_id)
   .then(() => {
-    window.location.replace('/chat');
+    useChatStore().selectUserId = retailer.value.user_id
+    router.push('/chat');
   });
 };
 

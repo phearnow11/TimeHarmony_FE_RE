@@ -136,7 +136,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, watch, computed, inject } from "vue";
 import { useChatStore } from "../stores/chat";
 import { useAuthStore } from "../stores/auth";
 import { useUserStore } from "../stores/user"; // Import the user store
@@ -163,6 +163,8 @@ const userMap = ref(new Map());
 const qMembers = ref("");
 
 var api = import.meta.env.VITE_API_PORT;
+
+const selectUserId = useChatStore()?.selectUserId ?? null
 
 const filteredChatUsers = computed(() => {
   if (!qMembers.value) return chatUsers.value;
@@ -328,6 +330,17 @@ onMounted(async () => {
     });
     await fetchChatUsers();
 
+    // Automatically select user if selectUserId is not null
+    if (selectUserId) {
+      const userToSelect = chatUsers.value.find(
+        (user) => user.user_id === selectUserId
+      );
+      if (userToSelect) {
+        await selectUser(userToSelect);
+        useChatStore().selectUserId = null
+      }
+    }
+
     // Set up real-time listener for new messages
     supabase
       .channel("public:messages")
@@ -345,6 +358,7 @@ onMounted(async () => {
     console.error("Error during auto-login:", loginError);
   }
 });
+
 
 watch(
   messages,

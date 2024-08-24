@@ -17,6 +17,7 @@ export const useChatStore = defineStore('chat', {
     selected: null,
     subscription: null,
     haveNewMessage: false,
+    selectUserId: null,
   }),
   actions: {
     hide(user_id) {
