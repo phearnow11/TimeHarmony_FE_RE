@@ -213,7 +213,7 @@
           <order-item
             v-for="item in selectedItems"
             :key="item.watch_id"
-            :productName="item.name || 'Loading...'"
+            :productName="item.watch_name || 'Loading...'"
             :productImage="item.image || ''"
             :price="item.price || 0"
           >

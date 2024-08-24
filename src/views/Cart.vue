@@ -97,9 +97,9 @@
         v-for="item in cartItems"
         :watch_id = "item.watch_id"
         :key="item.watch_id"
-        :productName="item.name || 'Loading...'"
+        :productName="item.watch_name || 'Loading...'"
         :retailerName="item.sellerName || 'Loading...'"
-        :productImage="item.image || ''"
+        :productImage="item.image_url || ''"
         :price="item.price || 0"
         :retailerAvatar="item.sellerAvatar || ''"
         :isSelected="item.isSelected"
@@ -402,7 +402,7 @@ const updateCartItem = (watchId, details) => {
       ...cartItems.value[index],
       name: details.name,
       price: parseFloat(details.price) || 0,
-      image: details.images?.[0] || "",
+      image: details.image_url || "",
       sellerName: details.seller?.user_log_info?.username || "",
       sellerAvatar: details.seller?.member_image || "",
     };
@@ -516,6 +516,7 @@ const isCartEmpty = computed(() => cartItems.value.length === 0 || selectedItems
 onMounted(async () => {
   try {
     await cartStore.getCart(auth.user_id);
+    
     cartItems.value = cartStore.cart_info.map((item) => ({
       ...item,
       isSelected: item.isSelected || false, // Use the isSelected property from the store
@@ -525,6 +526,8 @@ onMounted(async () => {
       sellerName: "Loading...",
       sellerAvatar: "",
     }));
+    console.log(cartItems.value);
+    
     await loadProvinces();
     await fetchAddresses();
     await fetchAllWatchDetails();

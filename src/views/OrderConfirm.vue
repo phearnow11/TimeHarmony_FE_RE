@@ -23,9 +23,9 @@
               <div class="flex items-start">
                 <ul class="space-y-4">
                 <li v-for="watch in detailedWatches" :key="watch.id" class="flex items-start p-4 rounded">
-                    <img :src="watch.images[0]" alt="Watch image" class="w-24 h-24 object-cover mr-4" />
+                    <img :src="watch.image_url" alt="Watch image" class="w-24 h-24 object-cover mr-4" />
                     <div class="flex justify-between w-full">
-                    <h3 class="font-bold">{{ watch.name }}</h3>
+                    <h3 class="font-bold">{{ watch.watch_name }}</h3>
                     <p class="text-xl font-bold pl-36 mb-2">{{ watch.price.toLocaleString('vi-VN') }} ₫</p>
                     </div>
                 </li>
