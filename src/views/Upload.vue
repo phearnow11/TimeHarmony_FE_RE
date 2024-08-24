@@ -486,18 +486,22 @@ function formatTimestamp(timestamp) {
     const hours = pad(date.getHours());
     const minutes = pad(date.getMinutes());
     const seconds = pad(date.getSeconds());
-    const milliseconds = pad(date.getMilliseconds(), 6); // Adjust for microseconds
+    const milliseconds = pad(date.getMilliseconds(), 6);
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
 const validateDate = (selectedDate) => {
   const today = new Date();
-  today.setHours(0, 0, 0, 0); // Reset time part for comparison
+  today.setHours(0, 0, 0, 0);
+  
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
   if (!selectedDate) return null;
 
-  if (selectedDate < today) {
-    dateWarning.value = "Bạn không thể chọn ngày trong quá khứ.";
+  if (selectedDate < tomorrow) {
+    dateWarning.value = "Bạn phải chọn ngày sau hôm nay ít nhất 1 ngày.";
     date.value = null;
   } else {
     dateWarning.value = "";
@@ -515,6 +519,7 @@ const formatDate = (date) => {
 
   return `${day}/${month}/${year}`;
 };
+
 console.log(formatDate(date.value));
 const isPopupVisible = ref(false);
 const popupMessage = ref("");

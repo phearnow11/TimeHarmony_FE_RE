@@ -15,7 +15,6 @@
     
   <div class="flex-1">
     <h2 class="text-2xl mt-4 text-primary relative bottom-4">Thống kê thu nhập</h2>
-
       <!-- Date Selection -->
       <div class="flex items-center mb-6">
         <label class="mr-3" for="startDate">Từ</label>
@@ -90,7 +89,6 @@
         </div>
       </div>
     </div>
-      
   </div>
 </div>
 
@@ -117,7 +115,6 @@ const maxStartDate = computed(() => {
 })
 
 const totalProfit = ref(0)
-const profitData = ref([])
 const postedWatches = ref(0)
 const soldWatches = ref(0)
 const error = ref(null)
