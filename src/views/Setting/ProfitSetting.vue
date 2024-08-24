@@ -12,87 +12,114 @@
         <li><router-link to="/setting/delete" class="hover-underline-animation-r">Xoá tài khoản</router-link></li>
       </ul>
     </aside>
+    
+  <div class="flex-1">
+    <h2 class="text-2xl mt-4 text-primary relative bottom-4">Thống kê thu nhập</h2>
 
-    <div class="container mx-auto p-4">
-      <h2 class="text-2xl mt-4 text-primary relative bottom-4">Thống kê thu nhập</h2>
-      <div class="p-1">
+      <!-- Date Selection -->
+      <div class="flex items-center mb-6">
+        <label class="mr-3" for="startDate">Từ</label>
+        <input 
+          type="date" 
+          id="startDate" 
+          v-model="startDate" 
+          :max="maxStartDate"
+          @change="updateEndDate"
+          class="p-2 border bg-black-99 rounded"
+        >
         
+        <label class="mx-5" for="endDate">Đến</label>
+        <input 
+          type="date" 
+          id="endDate" 
+          v-model="endDate" 
+          :min="startDate"
+          :max="currentDate"
+          class="p-2 border bg-black-99 rounded"
+        >
+      </div>
+    <div class="container mx-auto p-4">
+      <div class="p-1">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div v-for="(item, index) in performanceItems" :key="index" class="p-4 shadow">
+          <div class="p-4 shadow col-span-3">
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center space-x-4">
-                <div :class="`w-12 h-12 flex items-center justify-center ${item.bgColor}`">
-                  <i :class="`fas ${item.icon} text-white text-xl`"></i>
+                <div class="w-12 h-12 flex items-center justify-center bg-purple-500">
+                  <i class="fas fa-dollar-sign text-white text-xl"></i>
                 </div>
-                <div>
-                  <h3 class="text-2xl font-bold">{{ formatValue(item.value, item.isCurrency) }}</h3>
-                  <p class="text-sm text-gray-99">{{ item.label }}</p>
-                  <!-- Chỉ hiển thị phần trăm thay đổi cho biểu đồ doanh thu theo ngày -->
-                  <p v-if="index === 0" :class="`text-sm ${item.isIncrease ? 'text-green-500' : 'text-red-500'}`">
-                    <i :class="`fas ${item.isIncrease ? 'fa-arrow-up' : 'fa-arrow-down'} mr-1`"></i>
-                    {{ item.percentChange }}% so với hôm qua
-                  </p>
-                  
-                </div>
+                <span>Doanh thu theo ngày</span>
               </div>
-              
             </div>
             <div class="h-64">
-              <canvas :ref="el => { if (el) chartRefs[index] = el }"></canvas>
+              <canvas ref="profitChart"></canvas>
             </div>
           </div>
         </div>
-        
       </div>
     </div>
+
+    <div class="flex w-full">
+      <!-- Posted Watches -->
+      <div class="p-4 mr-5 shadow w-1/2">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 flex items-center justify-center bg-blue-500">
+              <i class="fas fa-upload text-white text-xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold">{{ postedWatches }}</h3>
+              <p class="text-sm text-gray-99">Sản phẩm đã đăng</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sold Watches -->
+      <div class="p-4 shadow w-1/2">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-4">
+            <div class="w-12 h-12 flex items-center justify-center bg-yellow-500">
+              <i class="fas fa-shopping-cart text-white text-xl"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-bold">{{ soldWatches }}</h3>
+              <p class="text-sm text-gray-99">Sản phẩm đã bán</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+      
   </div>
+</div>
+
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import Chart from 'chart.js/auto'
 import { useUserStore } from '../../stores/user'
 import { useAuthStore } from '../../stores/auth.js'
-import * as XLSX from 'xlsx';
 
 const userStore = useUserStore()
 const authStore = useAuthStore()
 
-const incomeChart = ref(null)
-const chartRefs = reactive({})
+const profitChart = ref(null)
+const chartInstance = ref(null)
+const startDate = ref('')
+const endDate = ref('')
+const currentDate = computed(() => new Date().toISOString().split('T')[0])
+const maxStartDate = computed(() => {
+  const date = new Date(currentDate.value)
+  date.setDate(date.getDate() - 7)
+  return date.toISOString().split('T')[0]
+})
 
-const createMonthlyData = (value) => {
-  const currentMonth = new Date().getMonth();
-  return Array(12).fill(0).map((_, index) => index === currentMonth ? value : 0);
-};
-
-const performanceItems = ref([
-  {
-    icon: 'fa-dollar-sign',
-    value: 0,
-    label: 'Tổng lợi nhuận theo ngày',
-    bgColor: 'bg-purple-500',
-    data: [],
-    isCurrency: true,
-    yesterdayValue: 0,
-    percentChange: 0,
-    isIncrease: true
-  },
-  {
-    icon: 'fa-upload',
-    value: 0,
-    label: 'Sản phẩm đã đăng',
-    bgColor: 'bg-blue-500',
-    isCurrency: false
-  },
-  {
-    icon: 'fa-shopping-cart',
-    value: 0,
-    label: 'Sản phẩm đã bán',
-    bgColor: 'bg-yellow-500',
-    isCurrency: false
-  },
-])
+const totalProfit = ref(0)
+const profitData = ref([])
+const postedWatches = ref(0)
+const soldWatches = ref(0)
+const error = ref(null)
 
 const formatValue = (value, isCurrency) => {
   if (isCurrency) {
@@ -101,18 +128,21 @@ const formatValue = (value, isCurrency) => {
   return value
 }
 
+const updateProfitChart = (labels, data) => {
+  if (chartInstance.value) {
+    chartInstance.value.destroy()
+  }
 
-const updateDailyProfitChart = (labels, data) => {
-  const ctx = chartRefs[0].getContext('2d');
-  new Chart(ctx, {
+  const ctx = profitChart.value.getContext('2d')
+  chartInstance.value = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: labels.map(formatDateForDisplay), // Áp dụng định dạng mới cho nhãn
+      labels: labels,
       datasets: [{
         label: 'Doanh thu theo ngày',
         data: data,
-        backgroundColor: getChartColor(0, 0.6),
-        borderColor: getChartColor(0),
+        backgroundColor: 'rgba(144, 97, 249, 0.6)',
+        borderColor: 'rgb(144, 97, 249)',
         borderWidth: 1
       }]
     },
@@ -120,7 +150,6 @@ const updateDailyProfitChart = (labels, data) => {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        
         y: {
           beginAtZero: true,
           ticks: {
@@ -131,129 +160,87 @@ const updateDailyProfitChart = (labels, data) => {
       plugins: {
         tooltip: {
           callbacks: {
-            title: (tooltipItems) => {
-              return formatDateForDisplay(labels[tooltipItems[0].dataIndex]);
-            },
             label: (context) => formatValue(context.parsed.y, true)
           }
         }
       }
     }
-  });
-};
-
-const createCharts = () => {
-  performanceItems.value.forEach((item, index) => {
-    if (index === 0) return;
-    const ctx = chartRefs[index].getContext('2d')
-    new Chart(ctx, {
-      type: 'table',
-      data: {
-        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-        datasets: [{
-          label: item.label,
-          data: item.data,
-          borderColor: getChartColor(index),
-          backgroundColor: getChartColor(index, 0.1),
-          tension: 0.4,
-          fill: true,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            padding: 10,
-            cornerRadius: 5,
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: (value) => formatValue(value, item.isCurrency),
-              stepSize: 1
-            }
-          }
-        },
-      }
-    })
   })
 }
 
-const getChartColor = (index, alpha = 1) => {
-  const colors = ['#9061f9', '#3B82F6', '#F59E0B']
-  return alpha === 1 ? colors[index] : `${colors[index]}${Math.round(alpha * 255).toString(16)}`
+const updateEndDate = () => {
+  const start = new Date(startDate.value)
+  const end = new Date(start)
+  end.setDate(end.getDate() + 7)
+  
+  if (end > new Date(currentDate.value)) {
+    end = new Date(currentDate.value)
+  }
+  
+  endDate.value = end.toISOString().split('T')[0]
+  updateChart()
 }
 
+const updateChart = () => {
+  if (startDate.value && endDate.value) {
+    fetchAndProcessProfitData(startDate.value, endDate.value)
+  }
+}
+
+const fetchAndProcessProfitData = async (start, end) => {
+  try {
+    const sellerId = authStore.user_id
+    const response = await userStore.getProfitOfSellerByDate(sellerId, start, end)
+    console.log("API Response:", JSON.stringify(response, null, 2))
+
+    if (!Array.isArray(response)) {
+      throw new Error("Unexpected response format")
+    }
+
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+    const dailyProfits = []
+
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const currentDate = d.toISOString().split('T')[0]
+      const profitEntry = response.find(item => new Date(item.date).toISOString().split('T')[0] === currentDate)
+      dailyProfits.push({
+        date: currentDate,
+        profit: profitEntry ? profitEntry.daily_profit : 0
+      })
+    }
+
+    totalProfit.value = dailyProfits.reduce((sum, item) => sum + item.profit, 0)
+
+    const labels = dailyProfits.map(item => item.date)
+    const data = dailyProfits.map(item => item.profit)
+
+    updateProfitChart(labels, data)
+  } catch (err) {
+    console.error("Error fetching profit data:", err)
+    error.value = "Failed to fetch profit data. Please try refreshing the page."
+  }
+}
 
 onMounted(async () => {
-  const sellerId = authStore.user_id;
+  const sellerId = authStore.user_id
+
+  // Set default date range to last 7 days
+  const today = new Date()
+  endDate.value = today.toISOString().split('T')[0]
+  const sevenDaysAgo = new Date(today.setDate(today.getDate() - 7))
+  startDate.value = sevenDaysAgo.toISOString().split('T')[0]
 
   try {
-    function formatDate(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+    if (profitChart.value) {
+      await fetchAndProcessProfitData(startDate.value, endDate.value)
     }
 
-    const currentDate = new Date();
-    const dailyProfits = [];
-    const labels = [];
-
-    // Lấy dữ liệu cho 7 ngày gần nhất
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(currentDate);
-      date.setDate(currentDate.getDate() - i);
-      const formattedDate = formatDate(date);
-      const profit = await userStore.getProfitOfSellerByDate(sellerId, formattedDate);
-      dailyProfits.push(profit);
-      labels.push(formattedDate);
-    }
-
-    // Cập nhật dữ liệu cho biểu đồ doanh thu theo ngày
-    performanceItems.value[0].value = dailyProfits[6]; // Ngày hiện tại
-    performanceItems.value[0].data = dailyProfits;
-
-    const profitToday = dailyProfits[6];
-    const profitYesterday = dailyProfits[5];
-    const percentChange = profitYesterday !== 0
-      ? ((profitToday - profitYesterday) / profitYesterday) * 100
-      : 0;
-
-    performanceItems.value[0].percentChange = Math.abs(percentChange).toFixed(0);
-    performanceItems.value[0].isIncrease = percentChange >= 0;
-
-    // Cập nhật biểu đồ doanh thu hàng ngày
-    updateDailyProfitChart(labels, dailyProfits);
-
-    // Lấy và cập nhật dữ liệu cho các biểu đồ khác
-    const postedWatchesData = await userStore.countPostWatch(sellerId);
-    const soldWatchesData = await userStore.countSoldWatch(sellerId);
-
-    performanceItems.value[1].value = postedWatchesData;
-    performanceItems.value[2].value = soldWatchesData;
-
-    // Cập nhật các biểu đồ khác
-    createCharts();
-    
-    // Lấy và cập nhật dữ liệu cho biểu đồ tổng thu nhập
-    const profitData = await userStore.getProfitOfSeller(sellerId);
-    createIncomeChart(createMonthlyData(profitData));
+    // Fetch posted and sold watches data
+    postedWatches.value = await userStore.countPostWatch(sellerId)
+    soldWatches.value = await userStore.countSoldWatch(sellerId)
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('Error fetching data:', error)
   }
-});
-
-function formatDateForDisplay(dateString) {
-  const [year, month, day] = dateString.split('-');
-  return `${day}/${month}`;
-}
-
+})
 </script>

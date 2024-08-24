@@ -556,17 +556,19 @@ export const useUserStore = defineStore("user", {
         throw error;
       }
     },
-    async getProfitOfSellerByDate(seller_id, date) {
+    async getProfitOfSellerByDate(seller_id, startDate, endDate) {
       try {
+        const formattedStartDate = startDate.replace(/-/g, '')
+        const formattedEndDate = endDate.replace(/-/g, '')
         const response = await axios.get(
-          `${api}/seller/get/seller-profit-by-day/${seller_id}/day=${date}`
-        );
-        console.log("Daily profit response:", response.data);
-        this.profitByMonth = response.data.monthly_profit;
-        return response.data;
+          `${api}/seller/get/daily-profit/${seller_id}/${formattedStartDate}to${formattedEndDate}`
+        )
+        console.log("Daily profit response:", response.data)
+        
+        return response.data
       } catch (error) {
-        console.error("Error fetching monthly profit:", error);
-        throw error;
+        console.error("Error fetching daily profit:", error)
+        throw error
       }
     },
     async countPostWatch(seller_id) {
