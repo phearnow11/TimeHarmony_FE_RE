@@ -1866,7 +1866,11 @@ const getChartLabels = (start, end) => {
 const createMonthlyRevenueChart = async () => {
   try {
     validateDates();
-    const revenueData = await fetchAndProcessRevenueData(startDate.value, endDate.value);
+    let adjustedEndDate = new Date(endDate.value);
+    adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
+    const adjustedEndDateString = adjustedEndDate.toISOString().split('T')[0];
+
+    const revenueData = await fetchAndProcessRevenueData(startDate.value, adjustedEndDateString);
     console.log("Processed revenue data:", revenueData);
 
     if (monthlyRevenueChartInstance.value) monthlyRevenueChartInstance.value.destroy();
