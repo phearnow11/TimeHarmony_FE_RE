@@ -612,6 +612,20 @@ export const useAdminStore = defineStore("admin", {
       } finally {
         this.isLoading = false;
       }
+    },
+
+    getUsersByPage(state, page) {
+      const url = `${api}/admin/get/member/by?state=${state}&role=user&page=${page}&staff`;
+    
+      return axios.get(url)
+        .then(response => {
+          // Handle the response data here
+          return response.data;
+        })
+        .catch(error => {
+          // Handle errors here
+          console.error('There was a problem with the axios request:', error);
+        });
     }    
   },
   getters: {

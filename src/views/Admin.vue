@@ -1485,7 +1485,7 @@ const filteredSeller = computed(() => {
 });
 
 const filteredStaff = computed(() => {
-  return adminStore.filteredMembers(qStaff.value, selectedRole.value, selectedStatus.value);
+  return adminStore.filteredMembers(qStaff.value, 'ROLE_STAFF', selectedStatus.value);
 });
 
 const filteredShipper = computed(() => {
