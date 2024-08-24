@@ -208,7 +208,7 @@ onMounted(async () => {
         const savedPayment = await savePaymentDetail(paymentDataNullOrder);
         console.log('Saved payment details:', savedPayment);
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 
 });
