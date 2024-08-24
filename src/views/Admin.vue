@@ -637,8 +637,8 @@
                 </div>
               </td>
               <td class="p-2 border-b">{{ req[product.watch_id]?.appraiser_assigned ?? null }}</td>
-              <td v-if="req[product.watch_id]?.appraiser_assigned" class="p-2 border-b">{{ req[product.watch_id]?.appointment_date  ? formatDate(req[product.watch_id]?.appointment_date) : 'Chưa có ngày' }}</td>
-              <td v-else class="p-2 border-b">{{ req[product.watch_id]?.appointment_date  ? formatDateNoTime(req[product.watch_id]?.appointment_date) : 'Chưa có ngày' }}</td>
+              <td v-if="req[product.watch_id]?.appraiser_assigned" class="p-2 border-b">{{ req[product.watch_id]?.appointment_date ? formatDate(req[product.watch_id]?.appointment_date) : 'Chưa có ngày' }}</td>
+              <td v-else class="p-2 border-b">{{ req[product.watch_id]?.appointment_date  ? formatDateWithoutTime(req[product.watch_id]?.appointment_date) : 'Chưa có ngày' }}</td>
               <td class="p-2 border-b">{{ req[product.watch_id]?.status ?? null  }}</td>
               <td class="p-2 border-b">
                 <button @click="openAssignModal(product)" class="hover-underline-animation">
@@ -924,7 +924,7 @@
         <div class="flex w-full justify-start ">
           <VueDatePicker v-model="date" placeholder="Chọn ngày giao kiểm định" :format="formatDate"></VueDatePicker>
         </div>
-        <span v-if="!req[selectedWatch.watch_id].appraiser_assigned" >Khách chọn ngày kiểm định: {{ formatDateNoTime(req[selectedWatch.watch_id]?.appointment_date) }}</span>
+        <span v-if="!req[selectedWatch.watch_id].appraiser_assigned" >Khách chọn ngày kiểm định: {{ formatDateWithoutTime(req[selectedWatch.watch_id]?.appointment_date) }}</span>
           <p v-if="dateWarning" class="text-red-500 pt-2">{{ dateWarning }}</p>
         <br />
         <div class="modal-actions">
@@ -2220,6 +2220,20 @@ const formatDate = (dateString) => {
 const formatDateNoTime = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('vi-VN');
+};
+
+const formatDateWithoutTime = (dateString) => {
+  if (!dateString) return 'Chưa có ngày';
+  
+  const date = new Date(dateString);
+  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+  
+  const day = utcDate.getUTCDate();
+  const month = utcDate.getUTCMonth() + 1;
+  const year = utcDate.getUTCFullYear();
+  
+  // Định dạng ngày tháng theo kiểu Việt Nam
+  return `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
 };
 
 </script>
