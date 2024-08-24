@@ -160,7 +160,7 @@
             </div>
           </div>
           <div class="flex items-center space-x-4 my-5">
-            <label class="mr-3 block text-sm font-medium " for="startDailyDate" >Từ ngày</label>
+            <label class="mr-3 block text-sm font-medium" for="startDailyDate">Từ ngày</label>
             <input
               type="date" 
               id="startDailyDate" 
@@ -170,7 +170,7 @@
               class="p-2 border bg-black-99 rounded"
             >
             
-            <label class="mx-5 block text-sm font-medium " for="endDailyDate">Đến ngày</label>
+            <label class="mx-5 block text-sm font-medium" for="endDailyDate">Đến ngày</label>
             <input 
               type="date" 
               id="endDailyDate" 
@@ -1398,24 +1398,25 @@ onMounted(async () => {
     setGreeting();
     if (currentSection.value === 'profit-overview') {
       await createCharts();
-      const today = new Date()
-      endDailyDate.value = today.toISOString().split('T')[0]
-      const sevenDaysAgo = new Date(today.setDate(today.getDate() - 7))
-      startDailyDate.value = sevenDaysAgo.toISOString().split('T')[0]
-
-      // Set apiendDailyDate to one day after endDailyDate
-      const apiEnd = new Date(endDailyDate.value)
-      apiEnd.setDate(apiEnd.getDate() + 1)
-      apiendDailyDate.value = apiEnd.toISOString().split('T')[0]
-
       try {
+        const today = new Date()
+        endDailyDate.value = formatDailyDate(today)
+        const sevenDaysAgo = new Date(today)
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+        startDailyDate.value = formatDailyDate(sevenDaysAgo)
+
+        // Set apiendDailyDate to one day after endDailyDate
+        const apiEnd = new Date(today)
+        apiEnd.setDate(apiEnd.getDate() + 1)
+        apiendDailyDate.value = formatDailyDate(apiEnd)
+
         if (profitChart.value) {
           await nextTick()
           await fetchAndProcessProfitData(startDailyDate.value, endDailyDate.value, apiendDailyDate.value)
         }
       } catch (error) {
         console.error('Error fetching data:', error)
-      } 
+      }
     }
   } catch (err) {
     console.error("Error fetching data:", err);
@@ -2000,18 +2001,23 @@ watch(currentSection, async (newSection, oldSection) => {
 
 //Chart Showing - Daily Revenue (7 days)
 
+
 const profitChart = ref(null)
 const chartInstance = ref(null)
 const startDailyDate = ref('')
 const endDailyDate = ref('')
-const currentDate = computed(() => new Date().toISOString().split('T')[0])
+const currentDate = computed(() => formatDailyDate(new Date()))
 const maxstartDailyDate = computed(() => {
-  const date = new Date(currentDate.value)
+  const date = new Date()
   date.setDate(date.getDate() - 7)
-  return date.toISOString().split('T')[0]
+  return formatDailyDate(date)
 })
 
 const totalProfit = ref(0)
+
+const formatDailyDate = (date) => {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
 
 const formatValue = (value, isCurrency) => {
   if (isCurrency) {
@@ -2064,6 +2070,12 @@ const updateProfitChart = (data) => {
         }
       },
       scales: {
+        x: {
+          type: 'category',
+          ticks: {
+            source: 'data'
+          }
+        },
         y: {
           type: 'linear',
           display: true,
@@ -2118,12 +2130,12 @@ const updateendDailyDate = () => {
     end = currentDateObj
   }
   
-  endDailyDate.value = end.toISOString().split('T')[0]
+  endDailyDate.value = formatDailyDate(end)
   
   // Set apiendDailyDate to one day after endDailyDate
   const apiEnd = new Date(end)
   apiEnd.setDate(apiEnd.getDate() + 1)
-  apiendDailyDate.value = apiEnd.toISOString().split('T')[0]
+  apiendDailyDate.value = formatDailyDate(apiEnd)
   
   updateDailyChart()
 }
@@ -2133,6 +2145,7 @@ const updateDailyChart = () => {
     fetchAndProcessProfitData(startDailyDate.value, endDailyDate.value, apiendDailyDate.value)
   }
 }
+
 const fetchAndProcessProfitData = async (start, end, apiEnd) => {
   try {
     const [revenueResponse, orderResponse] = await Promise.all([
@@ -2151,7 +2164,7 @@ const fetchAndProcessProfitData = async (start, end, apiEnd) => {
     const aggregatedData = {}
 
     revenueResponse.forEach(item => {
-      const date = new Date(item.date).toISOString().split('T')[0]
+      const date = formatDailyDate(new Date(item.date))
       if (!aggregatedData[date]) {
         aggregatedData[date] = { profit: 0, quantity: 0 }
       }
@@ -2167,7 +2180,7 @@ const fetchAndProcessProfitData = async (start, end, apiEnd) => {
     })
 
     orderResponse.forEach(item => {
-      const date = new Date(item.date).toISOString().split('T')[0]
+      const date = formatDailyDate(new Date(item.date))
       if (!aggregatedData[date]) {
         aggregatedData[date] = { profit: 0, quantity: 0 }
       }
@@ -2179,7 +2192,7 @@ const fetchAndProcessProfitData = async (start, end, apiEnd) => {
     const combinedData = []
 
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const currentDate = d.toISOString().split('T')[0]
+      const currentDate = formatDailyDate(d)
       combinedData.push({
         date: currentDate,
         profit: aggregatedData[currentDate]?.profit || 0,

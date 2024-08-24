@@ -21,9 +21,9 @@
         <input 
           type="date" 
           id="startDate" 
-          v-model="startDate" 
+          :value="startDate"
           :max="maxStartDate"
-          @change="updateEndDate"
+          @input="updateStartDate($event.target.value)"
           class="p-2 border bg-black-99 rounded"
         >
         
@@ -31,7 +31,7 @@
         <input 
           type="date" 
           id="endDate" 
-          v-model="endDate"
+          :value="endDate"
           disabled
           :min="startDate"
           :max="currentDate"
@@ -103,15 +103,24 @@ import { useAuthStore } from '../../stores/auth.js'
 const userStore = useUserStore()
 const authStore = useAuthStore()
 
-const profitChart = ref(null)
-const chartInstance = ref(null)
+const profitChart = ref(null) //lưu trữ tham chiếu đến phần tử canvas trong DOM
+const chartInstance = ref(null) //một ref để lưu trữ instance của biểu đồ Chart.js.
 const startDate = ref('')
 const endDate = ref('')
-const currentDate = computed(() => new Date().toISOString().split('T')[0])
+const currentDate = computed(() => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+})
+
+const updateStartDate = (value) => {
+  startDate.value = value
+  updateEndDate()
+}
+
 const maxStartDate = computed(() => {
   const date = new Date(currentDate.value)
   date.setDate(date.getDate() - 7)
-  return date.toISOString().split('T')[0]
+  return formatDate(date)
 })
 
 const totalProfit = ref(0)
@@ -127,6 +136,8 @@ const formatValue = (value, isCurrency) => {
 }
 
 const updateProfitChart = (labels, data) => {
+  //Kiểm tra và hủy biểu đồ cũ nếu tồn tại
+  //Không tạo nhiều biểu đồ chồng lên nhau
   if (chartInstance.value) {
     chartInstance.value.destroy()
   }
@@ -177,11 +188,13 @@ const updateEndDate = () => {
   if (end > currentDateObj) {
     end = currentDateObj
   }
-  endDate.value = end.toISOString().split('T')[0]
+
+  endDate.value = formatDate(end)
+  
   // Set apiEndDate to one day after endDate
   const apiEnd = new Date(end)
   apiEnd.setDate(apiEnd.getDate() + 1)
-  apiEndDate.value = apiEnd.toISOString().split('T')[0]
+  apiEndDate.value = formatDate(apiEnd)
   
   updateChart()
 }
@@ -204,11 +217,12 @@ const fetchAndProcessProfitData = async (start, end, apiEnd) => {
 
     // Aggregate profits for each unique date
     const aggregatedProfits = response.reduce((acc, item) => {
-      const date = new Date(item.date).toISOString().split('T')[0]
-      if (!acc[date]) {
-        acc[date] = 0
+      const date = new Date(item.date)
+      const dateString = formatDate(date)
+      if (!acc[dateString]) {
+        acc[dateString] = 0
       }
-      acc[date] += item.daily_profit
+      acc[dateString] += item.daily_profit
       return acc
     }, {})
 
@@ -217,7 +231,7 @@ const fetchAndProcessProfitData = async (start, end, apiEnd) => {
     const dailyProfits = []
 
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const currentDate = d.toISOString().split('T')[0]
+      const currentDate = formatDate(d)
       dailyProfits.push({
         date: currentDate,
         profit: aggregatedProfits[currentDate] || 0
@@ -236,19 +250,23 @@ const fetchAndProcessProfitData = async (start, end, apiEnd) => {
   }
 }
 
+const formatDate = (date) => {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
 onMounted(async () => {
   const sellerId = authStore.user_id
-
+  
   // Set default date range to last 7 days
   const today = new Date()
-  endDate.value = today.toISOString().split('T')[0]
-  const sevenDaysAgo = new Date(today.setDate(today.getDate() - 7))
-  startDate.value = sevenDaysAgo.toISOString().split('T')[0]
+  endDate.value = formatDate(today)
+  const sevenDaysAgo = new Date(today)
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+  startDate.value = formatDate(sevenDaysAgo)
 
   // Set apiEndDate to one day after endDate
-  const apiEnd = new Date(endDate.value)
+  const apiEnd = new Date(today)
   apiEnd.setDate(apiEnd.getDate() + 1)
-  apiEndDate.value = apiEnd.toISOString().split('T')[0]
+  apiEndDate.value = formatDate(apiEnd)
 
   try {
     if (profitChart.value) {
