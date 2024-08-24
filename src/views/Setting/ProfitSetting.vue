@@ -32,7 +32,8 @@
         <input 
           type="date" 
           id="endDate" 
-          v-model="endDate" 
+          v-model="endDate"
+          disabled
           :min="startDate"
           :max="currentDate"
           class="p-2 border bg-black-99 rounded"
@@ -135,7 +136,7 @@ const updateProfitChart = (labels, data) => {
 
   const ctx = profitChart.value.getContext('2d')
   chartInstance.value = new Chart(ctx, {
-    type: 'bar',
+    type: 'line',
     data: {
       labels: labels,
       datasets: [{
@@ -168,29 +169,37 @@ const updateProfitChart = (labels, data) => {
   })
 }
 
+const apiEndDate = ref('')
+
 const updateEndDate = () => {
   const start = new Date(startDate.value)
-  const end = new Date(start)
+  let end = new Date(start)
   end.setDate(end.getDate() + 7)
   
-  if (end > new Date(currentDate.value)) {
-    end = new Date(currentDate.value)
+  const currentDateObj = new Date(currentDate.value)
+  if (end > currentDateObj) {
+    end = currentDateObj
   }
   
   endDate.value = end.toISOString().split('T')[0]
+  
+  // Set apiEndDate to one day after endDate
+  const apiEnd = new Date(end)
+  apiEnd.setDate(apiEnd.getDate() + 1)
+  apiEndDate.value = apiEnd.toISOString().split('T')[0]
+  
   updateChart()
 }
 
 const updateChart = () => {
   if (startDate.value && endDate.value) {
-    fetchAndProcessProfitData(startDate.value, endDate.value)
+    fetchAndProcessProfitData(startDate.value, endDate.value, apiEndDate.value)
   }
 }
-
-const fetchAndProcessProfitData = async (start, end) => {
+const fetchAndProcessProfitData = async (start, end, apiEnd) => {
   try {
     const sellerId = authStore.user_id
-    const response = await userStore.getProfitOfSellerByDate(sellerId, start, end)
+    const response = await userStore.getProfitOfSellerByDate(sellerId, start, apiEnd)
     console.log("API Response:", JSON.stringify(response, null, 2))
 
     if (!Array.isArray(response)) {
@@ -198,7 +207,7 @@ const fetchAndProcessProfitData = async (start, end) => {
     }
 
     const startDate = new Date(start)
-    const endDate = new Date(end)
+    const endDate = new Date(end) // Use the passed end date
     const dailyProfits = []
 
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
@@ -221,7 +230,6 @@ const fetchAndProcessProfitData = async (start, end) => {
     error.value = "Failed to fetch profit data. Please try refreshing the page."
   }
 }
-
 onMounted(async () => {
   const sellerId = authStore.user_id
 
@@ -231,9 +239,14 @@ onMounted(async () => {
   const sevenDaysAgo = new Date(today.setDate(today.getDate() - 7))
   startDate.value = sevenDaysAgo.toISOString().split('T')[0]
 
+  // Set apiEndDate to one day after endDate
+  const apiEnd = new Date(endDate.value)
+  apiEnd.setDate(apiEnd.getDate() + 1)
+  apiEndDate.value = apiEnd.toISOString().split('T')[0]
+
   try {
     if (profitChart.value) {
-      await fetchAndProcessProfitData(startDate.value, endDate.value)
+      await fetchAndProcessProfitData(startDate.value, endDate.value, apiEndDate.value)
     }
 
     // Fetch posted and sold watches data

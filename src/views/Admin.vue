@@ -159,6 +159,32 @@
               <canvas ref="monthlyRevenueChart"></canvas>
             </div>
           </div>
+          <div class="flex items-center space-x-4 my-5">
+            <label class="mr-3 block text-sm font-medium " for="startDailyDate" >Từ ngày</label>
+            <input
+              type="date" 
+              id="startDailyDate" 
+              v-model="startDailyDate" 
+              :max="maxstartDailyDate"
+              @change="updateendDailyDate"
+              class="p-2 border bg-black-99 rounded"
+            >
+            
+            <label class="mx-5 block text-sm font-medium " for="endDailyDate">Đến ngày</label>
+            <input 
+              type="date" 
+              id="endDailyDate" 
+              v-model="endDailyDate"
+              disabled
+              :min="startDailyDate"
+              :max="currentDate"
+              class="p-2 border bg-black-99 rounded"
+            >
+          </div>
+          <div class="back h-full p-4 rounded-lg shadow">
+            <canvas ref="profitChart"></canvas>
+          </div>
+          
         </div>
         
       </section>
@@ -1388,6 +1414,24 @@ onMounted(async () => {
     setGreeting();
     if (currentSection.value === 'profit-overview') {
       await createCharts();
+      const today = new Date()
+      endDailyDate.value = today.toISOString().split('T')[0]
+      const sevenDaysAgo = new Date(today.setDate(today.getDate() - 7))
+      startDailyDate.value = sevenDaysAgo.toISOString().split('T')[0]
+
+      // Set apiendDailyDate to one day after endDailyDate
+      const apiEnd = new Date(endDailyDate.value)
+      apiEnd.setDate(apiEnd.getDate() + 1)
+      apiendDailyDate.value = apiEnd.toISOString().split('T')[0]
+
+      try {
+        if (profitChart.value) {
+          await nextTick()
+          await fetchAndProcessProfitData(startDailyDate.value, endDailyDate.value, apiendDailyDate.value)
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      } 
     }
   } catch (err) {
     console.error("Error fetching data:", err);
@@ -1792,7 +1836,7 @@ const updateOrderStats = async () => {
     }
 
 
-//Chart Showing
+//Chart Showing - Monthly Revenue
 const currentSection = ref('profit-overview');
 const showCharts = ref(false);
 const monthlyRevenueChartInstance = ref(null);
@@ -1893,7 +1937,7 @@ const createMonthlyRevenueChart = async () => {
       data: {
         labels: labels,
         datasets: [{
-          label: 'Doanh Thu Hằng Tháng',
+          label: 'Lợi Nhuận Theo Tháng',
           data: data,
           borderColor: 'rgb(255, 99, 132)',
           backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -1969,6 +2013,200 @@ watch(currentSection, async (newSection, oldSection) => {
     showCharts.value = false;
   }
 });
+
+//Chart Showing - Daily Revenue (7 days)
+
+const profitChart = ref(null)
+const chartInstance = ref(null)
+const startDailyDate = ref('')
+const endDailyDate = ref('')
+const currentDate = computed(() => new Date().toISOString().split('T')[0])
+const maxstartDailyDate = computed(() => {
+  const date = new Date(currentDate.value)
+  date.setDate(date.getDate() - 7)
+  return date.toISOString().split('T')[0]
+})
+
+const totalProfit = ref(0)
+
+const formatValue = (value, isCurrency) => {
+  if (isCurrency) {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
+  }
+  return value
+}
+
+const updateProfitChart = (data) => {
+  if (chartInstance.value) {
+    chartInstance.value.destroy()
+  }
+  if (!profitChart.value) {
+    console.error("Canvas element not found")
+    return
+  }
+  const ctx = profitChart.value.getContext('2d')
+  chartInstance.value = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(item => item.date),
+      datasets: [
+        {
+          label: 'Doanh thu theo ngày',
+          data: data.map(item => item.profit),
+          borderColor: 'rgb(255, 99, 132)',
+          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+          yAxisID: 'y',
+        },
+        {
+          label: 'Số lượng đơn hàng',
+          data: data.map(item => item.quantity),
+          borderColor: 'rgb(54, 162, 235)',
+          backgroundColor: 'rgba(54, 162, 235, 0.5)',
+          yAxisID: 'y1',
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
+      stacked: false,
+      plugins: {
+        title: {
+          display: true,
+          text: 'Biểu đồ doanh thu và số lượng đơn hàng'
+        }
+      },
+      scales: {
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          title: {
+            display: true,
+            text: 'Doanh thu (VNĐ)'
+          },
+          ticks: {
+            callback: (value) => formatValue(value, true)
+          }
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          title: {
+            display: true,
+            text: 'Số lượng đơn hàng',
+            font: {
+              size: 14
+            }
+          },
+          grid: {
+            drawOnChartArea: false,
+          },
+          ticks: {
+            stepSize: 1,
+            beginAtZero: true,
+            precision: 0,
+            font: {
+              size: 12
+            }
+          },
+          suggestedMin: 0,
+          suggestedMax: Math.max(...data.map(item => item.quantity)) + 1
+        },
+      }
+    },
+  })
+}
+
+const apiendDailyDate = ref('')
+
+const updateendDailyDate = () => {
+  const start = new Date(startDailyDate.value)
+  let end = new Date(start)
+  end.setDate(end.getDate() + 7)
+  
+  const currentDateObj = new Date(currentDate.value)
+  if (end > currentDateObj) {
+    end = currentDateObj
+  }
+  
+  endDailyDate.value = end.toISOString().split('T')[0]
+  
+  // Set apiendDailyDate to one day after endDailyDate
+  const apiEnd = new Date(end)
+  apiEnd.setDate(apiEnd.getDate() + 1)
+  apiendDailyDate.value = apiEnd.toISOString().split('T')[0]
+  
+  updateDailyChart()
+}
+
+const updateDailyChart = () => {
+  if (startDailyDate.value && endDailyDate.value) {
+    fetchAndProcessProfitData(startDailyDate.value, endDailyDate.value, apiendDailyDate.value)
+  }
+}
+
+const fetchAndProcessProfitData = async (start, end, apiEnd) => {
+  try {
+    const [revenueResponse, orderResponse] = await Promise.all([
+      adminStore.getOrderRevenue(start, apiEnd),
+      adminStore.getDailySuccessOrder(start, apiEnd)
+    ])
+
+    console.log("Revenue API Response:", JSON.stringify(revenueResponse, null, 2))
+    console.log("Order API Response:", JSON.stringify(orderResponse, null, 2))
+
+    if (!Array.isArray(revenueResponse) || !Array.isArray(orderResponse)) {
+      throw new Error("Unexpected response format")
+    }
+
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+    const combinedData = []
+
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const currentDate = d.toISOString().split('T')[0]
+      const revenueEntry = revenueResponse.find(item => new Date(item.date).toISOString().split('T')[0] === currentDate)
+      const orderEntry = orderResponse.find(item => new Date(item.date).toISOString().split('T')[0] === currentDate)
+      
+      let profit = 0
+      if (revenueEntry) {
+        if ('daily_revenue' in revenueEntry) {
+          profit = revenueEntry.daily_revenue
+        } else if ('daily_profit' in revenueEntry) {
+          profit = revenueEntry.daily_profit
+        } else if ('profit' in revenueEntry) {
+          profit = revenueEntry.profit
+        } else {
+          console.warn(`Unexpected profit data structure for date ${currentDate}:`, revenueEntry)
+        }
+      }
+      
+      combinedData.push({
+        date: currentDate,
+        profit: profit,
+        quantity: orderEntry ? orderEntry.quantity_order : 0
+      })
+    }
+
+    console.log("Processed combinedData:", JSON.stringify(combinedData, null, 2))
+
+    totalProfit.value = combinedData.reduce((sum, item) => sum + item.profit, 0)
+
+    updateProfitChart(combinedData)
+  } catch (err) {
+    console.error("Error fetching and processing data:", err)
+    error.value = "Failed to fetch and process data. Please try refreshing the page."
+  }
+}
+
+//Chart daily
+
+
 
 
 

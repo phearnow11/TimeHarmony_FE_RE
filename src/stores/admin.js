@@ -45,6 +45,28 @@ export const useAdminStore = defineStore("admin", {
         this.isLoading = false;
       }
     },
+    async getDailySuccessOrder(startMonth, endMonth) {
+      const token = useAuthStore().token;
+      if (!token) return;
+      
+      this.isLoading = true;
+      this.error = null;
+  
+      try {
+        const response = await axios.get(`${api}/admin/get/daily-success-order/${startMonth}to${endMonth}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching total amount of successful orders:", error);
+        this.error = error.message || "Failed to fetch total amount of successful orders";
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
 
     async getNumOrderSuccess(month) {
       const token = useAuthStore().token;
