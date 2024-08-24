@@ -964,9 +964,11 @@
             </option>
           </select>
         </div>
-        
+        <p v-if="assignmentMessage" :class="{'text-green-500': assignmentMessage.includes('thành công'), 'text-red-500': assignmentMessage.includes('thất bại')}" class="mb-4">
+        {{ assignmentMessage }}
+      </p>
         <div class="modal-actions">
-          <button @click="assignShipModal = false" class="border-2 border-secondary p-2">
+          <button @click="closeModal" class="border-2 border-secondary p-2">
             Hủy
           </button>
           <button @click="assignOrderToShipper" :disabled="!selectedOrderId" class="th-p-btn">
@@ -976,46 +978,7 @@
       </div>
     </div>
 
-    <!-- Modal để xem các đơn giao -->
-    <div v-if="showShipperOrdersModal" class="modal">
-  <div class="modal-content">
-    <h2 class="text-2xl font-semibold mb-4">Các đơn được giao bởi {{ selectedShipper.first_name }}</h2>
     
-    <!-- Shipper Information -->
-    <div class="shipper-info mb-4">
-      <h3 class="text-xl font-medium mb-2">Thông tin Shipper:</h3>
-      <p><strong>ID:</strong> {{ selectedShipper.member_id }}</p>
-      <p><strong>Tên:</strong> {{ selectedShipper.first_name }} {{ selectedShipper.last_name }}</p>
-    </div>
-
-    <!-- Assigned Orders Table -->
-    <div class="assigned-orders mb-4">
-      <h3 class="text-xl font-medium mb-2">Đơn hàng đã giao:</h3>
-      <table class="w-full border-collapse">
-        <thead>
-          <tr>
-            <th class="border p-2">Mã đơn hàng</th>
-            <th class="border p-2">Tên khách hàng</th>
-            <th class="border p-2">Trạng thái</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="order in assignedOrders" :key="order.order_id">
-            <td class="border p-2">{{ order.order_id }}</td>
-            <td class="border p-2">{{ order.customer_name }}</td>
-            <td class="border p-2">{{ stateOrders[order.state] }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    
-    <div class="modal-actions">
-      <button @click="showShipperOrdersModal = false" class="border-2 border-secondary p-2">
-        Đóng
-      </button>
-    </div>
-  </div>
-</div>
 
   </div>
 
@@ -1320,7 +1283,6 @@ const closePromoteModal = () => {
 
 const showAssignModal = ref('')
 const selectedWatch = ref(null);
-
 const assignShipModal = ref(false);
 const showShipperOrdersModal = ref(false);
 const selectedShipper = ref(null);
@@ -1337,18 +1299,28 @@ const logSelection = () => {
 
 const assignedOrders = ref([]);
 
+const resetModalState = () => {
+  assignmentMessage.value = '';
+  selectedOrderId.value = '';
+};
+
 const openAssign = async (shipper, order) => {
   assignShipModal.value = true;
   selectedShipper.value = shipper;
   selectedOrderId.value = order;
+  resetModalState();
 };
 
-const openDetail = async (shipper) => {
-  showShipperOrdersModal.value = true;
-  selectedShipper.value = shipper;
-  console.log(selectedOrder.value);
-  assignedOrders.value = []; // Replace with actual API call
+const closeModal = () => {
+  assignShipModal.value = false;
+  resetModalState();
 };
+
+const openModal = () => {
+  assignShipModal.value = true;
+  resetModalState();
+};
+
 
 const openAssignModal = async (watch) => {
   selectedWatch.value = watch;
@@ -1356,22 +1328,34 @@ const openAssignModal = async (watch) => {
   console.log("RRRR",watch);
 };
 
-const assignOrderToShipper = () => {
+const assignmentMessage = ref('');
+
+const assignOrderToShipper = async () => {
   console.log('assignOrderToShipper called');
   console.log('Selected Order ID:', selectedOrderId.value);
-  console.log('Selected Order:', selectedOrder.value);
   console.log('Selected Shipper:', selectedShipper.value.member_id);
   
-    if (selectedOrder.value) {
-      // Your logic to assign the order to the shipper
-      useAdminStore().assignOrderToShipper(selectedShipper.value.member_id ,selectedOrderId.value)
-      console.log('Assigning order:', selectedOrderId.value, 'to shipper:', selectedShipper.value.member_id);
-    } else {
-      console.log('No order selected');
+  if (selectedOrderId.value) {
+    try {
+      const result = await useAdminStore().assignOrderToShipper(selectedShipper.value.member_id, selectedOrderId.value);
+      if (result === 'Shipper Assigned') {
+        assignmentMessage.value = "Phân đơn thành công";
+      } else {
+        assignmentMessage.value = "Phân đơn thất bại do người bán chưa đóng gói kiện hàng";
+      }
+    } catch (error) {
+      console.error('Error assigning order:', error);
+      assignmentMessage.value = "Phân đơn thất bại do người bán chưa đóng gói kiện hàng";
     }
-  
-
+  } else {
+    console.log('No order selected');
+    assignmentMessage.value = "Vui lòng chọn một đơn hàng";
+  }
 };
+
+watch(selectedOrderId, () => {
+  assignmentMessage.value = '';
+});
 
 function setGreeting() {
   const now = new Date();
@@ -2149,7 +2133,6 @@ const updateDailyChart = () => {
     fetchAndProcessProfitData(startDailyDate.value, endDailyDate.value, apiendDailyDate.value)
   }
 }
-
 const fetchAndProcessProfitData = async (start, end, apiEnd) => {
   try {
     const [revenueResponse, orderResponse] = await Promise.all([
@@ -2164,32 +2147,43 @@ const fetchAndProcessProfitData = async (start, end, apiEnd) => {
       throw new Error("Unexpected response format")
     }
 
+    // Aggregate revenue and order data
+    const aggregatedData = {}
+
+    revenueResponse.forEach(item => {
+      const date = new Date(item.date).toISOString().split('T')[0]
+      if (!aggregatedData[date]) {
+        aggregatedData[date] = { profit: 0, quantity: 0 }
+      }
+      if ('daily_revenue' in item) {
+        aggregatedData[date].profit += item.daily_revenue
+      } else if ('daily_profit' in item) {
+        aggregatedData[date].profit += item.daily_profit
+      } else if ('profit' in item) {
+        aggregatedData[date].profit += item.profit
+      } else {
+        console.warn(`Unexpected profit data structure for date ${date}:`, item)
+      }
+    })
+
+    orderResponse.forEach(item => {
+      const date = new Date(item.date).toISOString().split('T')[0]
+      if (!aggregatedData[date]) {
+        aggregatedData[date] = { profit: 0, quantity: 0 }
+      }
+      aggregatedData[date].quantity += item.quantity_order
+    })
+
     const startDate = new Date(start)
     const endDate = new Date(end)
     const combinedData = []
 
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       const currentDate = d.toISOString().split('T')[0]
-      const revenueEntry = revenueResponse.find(item => new Date(item.date).toISOString().split('T')[0] === currentDate)
-      const orderEntry = orderResponse.find(item => new Date(item.date).toISOString().split('T')[0] === currentDate)
-      
-      let profit = 0
-      if (revenueEntry) {
-        if ('daily_revenue' in revenueEntry) {
-          profit = revenueEntry.daily_revenue
-        } else if ('daily_profit' in revenueEntry) {
-          profit = revenueEntry.daily_profit
-        } else if ('profit' in revenueEntry) {
-          profit = revenueEntry.profit
-        } else {
-          console.warn(`Unexpected profit data structure for date ${currentDate}:`, revenueEntry)
-        }
-      }
-      
       combinedData.push({
         date: currentDate,
-        profit: profit,
-        quantity: orderEntry ? orderEntry.quantity_order : 0
+        profit: aggregatedData[currentDate]?.profit || 0,
+        quantity: aggregatedData[currentDate]?.quantity || 0
       })
     }
 

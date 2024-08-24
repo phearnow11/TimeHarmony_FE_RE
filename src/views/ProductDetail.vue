@@ -458,7 +458,7 @@ const loadAppraiserName = async () => {
       appraiserName.value = "Unknown";
     }
   } else {
-    appraiserName.value = "Not appraised yet";
+    appraiserName.value = "";
   }
 };
 

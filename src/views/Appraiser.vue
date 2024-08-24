@@ -56,10 +56,10 @@
           {{ column.name }}
         </h2>
         <draggable
-  v-model="column.tasks"
-  :group="'tasks'"
-  item-key="request_id"
-  @end="onDragEnd"
+          v-model="column.tasks"
+          :group="'tasks'"
+          item-key="request_id"
+          @end="onDragEnd"
           :class="[
             'flex-grow min-h-[200px] p-2 bg-[#343432]',
             { 'list-none': viewMode === 'kanban' },
@@ -553,8 +553,6 @@ if (useUserStore().role != "ROLE_STAFF") {
   router.push("/");
 }
 
-
-
 const id = ref("");
 const authStore = useAuthStore();
 const viewMode = ref("kanban");
@@ -676,17 +674,14 @@ const femaleGender = () => {
 const formatPrice = () => {
   // Loại bỏ tất cả ký tự không phải số
   let value = watchData.displayPrice.replace(/\D/g, '');
-  
   // Lưu giá trị số nguyên không có định dạng
   watchData.price = value;
-  
   // Định dạng số với dấu chấm làm dấu phân cách hàng nghìn
   watchData.displayPrice = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 };
 
 const validatePrice = () => {
   const price = Number(watchData.price);
-
   if (price < 100000) {
     priceWarning.value = "Giá phải lớn hơn hoặc bằng 100.000 VND";
   } else if (price > 1000000000) {
@@ -711,7 +706,6 @@ const closeConfirmModal = () => {
   showConfirmModal.value = false;
 };
 
-
 watch(
   () => showApproveModal.value,
   (newValue) => {
@@ -725,7 +719,6 @@ watch(
 
 const search = () => {
   const query = id.value.toLowerCase().trim();
-
   columns.value.forEach((column) => {
     column.tasks = column.tasks.map((task) => {
       const matches = Object.values(task).some(

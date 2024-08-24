@@ -180,9 +180,7 @@ const updateEndDate = () => {
   if (end > currentDateObj) {
     end = currentDateObj
   }
-  
   endDate.value = end.toISOString().split('T')[0]
-  
   // Set apiEndDate to one day after endDate
   const apiEnd = new Date(end)
   apiEnd.setDate(apiEnd.getDate() + 1)
@@ -196,6 +194,7 @@ const updateChart = () => {
     fetchAndProcessProfitData(startDate.value, endDate.value, apiEndDate.value)
   }
 }
+
 const fetchAndProcessProfitData = async (start, end, apiEnd) => {
   try {
     const sellerId = authStore.user_id
@@ -206,16 +205,25 @@ const fetchAndProcessProfitData = async (start, end, apiEnd) => {
       throw new Error("Unexpected response format")
     }
 
+    // Aggregate profits for each unique date
+    const aggregatedProfits = response.reduce((acc, item) => {
+      const date = new Date(item.date).toISOString().split('T')[0]
+      if (!acc[date]) {
+        acc[date] = 0
+      }
+      acc[date] += item.daily_profit
+      return acc
+    }, {})
+
     const startDate = new Date(start)
-    const endDate = new Date(end) // Use the passed end date
+    const endDate = new Date(end)
     const dailyProfits = []
 
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       const currentDate = d.toISOString().split('T')[0]
-      const profitEntry = response.find(item => new Date(item.date).toISOString().split('T')[0] === currentDate)
       dailyProfits.push({
         date: currentDate,
-        profit: profitEntry ? profitEntry.daily_profit : 0
+        profit: aggregatedProfits[currentDate] || 0
       })
     }
 
@@ -230,6 +238,7 @@ const fetchAndProcessProfitData = async (start, end, apiEnd) => {
     error.value = "Failed to fetch profit data. Please try refreshing the page."
   }
 }
+
 onMounted(async () => {
   const sellerId = authStore.user_id
 
